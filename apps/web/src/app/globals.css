@@ -1,0 +1,83 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@theme {
+  --spacing-0:  0px;
+  --spacing-1:  8px;
+  --spacing-2:  16px;
+  --spacing-3:  24px;
+  --spacing-4:  32px;
+  --spacing-5:  40px;
+  --spacing-6:  48px;
+  --spacing-8:  64px;
+  --spacing-10: 80px;
+  --spacing-12: 96px;
+  --spacing-16: 128px;
+  --radius-sm:  8px;
+  --radius-md:  16px;
+  --radius-lg:  24px;
+  --radius-xl:  32px;
+  --radius-2xl: 48px;
+  --text-xs:   12px; --text-xs--line-height:   16px;
+  --text-sm:   14px; --text-sm--line-height:   24px;
+  --text-base: 16px; --text-base--line-height: 24px;
+  --text-lg:   18px; --text-lg--line-height:   32px;
+  --text-xl:   24px; --text-xl--line-height:   32px;
+  --text-2xl:  32px; --text-2xl--line-height:  40px;
+  --text-3xl:  40px; --text-3xl--line-height:  48px;
+  --text-4xl:  48px; --text-4xl--line-height:  64px;
+  --color-obsidian:         #0A0A0A;
+  --color-obsidian-surface: #111111;
+  --color-obsidian-border:  #1F1F1F;
+  --color-obsidian-muted:   #2A2A2A;
+  --color-ivory:            #FFFFFF;
+  --color-ivory-surface:    #F7F7F7;
+  --color-ivory-border:     #E5E5E5;
+  --color-ivory-muted:      #D4D4D4;
+  --color-signal-green: #00FF87;
+  --color-signal-amber: #FFB800;
+  --color-signal-red:   #FF3B3B;
+  --color-signal-blue:  #3B82F6;
+  --animate-fade-up:    fade-up 0.4s cubic-bezier(0.16,1,0.3,1) forwards;
+  --animate-pulse-ring: pulse-ring 2s ease-in-out infinite;
+}
+
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes pulse-ring {
+  0%, 100% { transform: scale(1);    opacity: 1; }
+  50%       { transform: scale(1.08); opacity: 0.7; }
+}
+
+@layer base {
+  :root {
+    --bg:      #FFFFFF;
+    --surface: #F7F7F7;
+    --border:  #E5E5E5;
+    --fg:      #0A0A0A;
+  }
+  .dark {
+    --bg:      #0A0A0A;
+    --surface: #111111;
+    --border:  #1F1F1F;
+    --fg:      #FFFFFF;
+  }
+  body {
+    background-color: var(--bg);
+    color: var(--fg);
+  }
+}
+
+@utility glass {
+  backdrop-filter: blur(20px);
+  background: linear-gradient(135deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.02) 100%);
+  border: 1px solid rgba(255,255,255,0.08);
+}
+@utility glass-light {
+  backdrop-filter: blur(20px);
+  background: linear-gradient(135deg, rgba(0,0,0,0.04) 0%, rgba(0,0,0,0.01) 100%);
+  border: 1px solid rgba(0,0,0,0.08);
+}

@@ -1,0 +1,6 @@
+{
+	"dependencies": {
+		"turbo": "^2.8.11"
+	},
+	"packageManager": "pnpm@10.23.0"
+}
