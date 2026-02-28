@@ -1,9 +1,13 @@
+"use client";
+import VisaRingWidget from "@/components/widgets/VisaRingWidget";
+import WageCalendarWidget from "@/components/widgets/WageCalendarWidget";
+import SafeHomeWidget from "@/components/widgets/SafeHomeWidget";
+import MagicPalette from "@/components/MagicPalette";
+
 export default function DashboardPage() {
   return (
     <main className="min-h-screen bg-[#0A0A0A] text-white font-mono">
       <div className="max-w-[1200px] mx-auto px-[32px] py-[48px]">
-
-        {/* Header */}
         <header className="flex items-center justify-between mb-[48px]">
           <div>
             <h1 className="text-[32px] font-bold tracking-tight">LEGAL-OS</h1>
@@ -13,21 +17,17 @@ export default function DashboardPage() {
             <span>⌘K</span><span>매직 팔레트</span>
           </div>
         </header>
-
-        {/* 3대 위젯 그리드 */}
         <section className="grid grid-cols-1 md:grid-cols-3 gap-[24px]">
           <VisaRingWidget />
           <WageCalendarWidget />
           <SafeHomeWidget />
         </section>
-
-        {/* 빠른 액션 */}
         <section className="mt-[32px] grid grid-cols-2 md:grid-cols-4 gap-[16px]">
           {[
             { emoji: "📠", label: "팩스 발송", href: "/fax" },
-            { emoji: "📄", label: "PDF 생성", href: "/docs" },
+            { emoji: "📄", label: "PDF 생성",  href: "/docs" },
             { emoji: "💳", label: "구독 관리", href: "/billing" },
-            { emoji: "⚙️", label: "내 정보", href: "/profile" },
+            { emoji: "⚙️", label: "내 정보",   href: "/profile" },
           ].map(({ emoji, label, href }) => (
             <a key={label} href={href}
                className="flex items-center gap-[12px] rounded-[16px] border border-white/10 px-[16px] py-[16px]
@@ -37,7 +37,6 @@ export default function DashboardPage() {
             </a>
           ))}
         </section>
-
       </div>
       <MagicPalette />
     </main>
