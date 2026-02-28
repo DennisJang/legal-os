@@ -8,26 +8,32 @@ export default function VisaRingWidget() {
   const dash = circ * Math.min(currentScore / targetScore, 1);
 
   return (
-    <div className="flex flex-col items-center gap-8 rounded-[24px] bg-[#111] border border-white/10 p-8">
-      <div className="relative w-[144px] h-[144px]">
-        <svg viewBox="0 0 144 144" className="rotate-[-90deg]" width={144} height={144}>
+    <div style={{ display:"flex", flexDirection:"column", alignItems:"center", gap:24,
+                  borderRadius:24, backgroundColor:"#111111", border:"1px solid rgba(255,255,255,0.1)",
+                  padding:32, color:"#fff" }}>
+      <div style={{ position:"relative", width:144, height:144 }}>
+        <svg viewBox="0 0 144 144" style={{ transform:"rotate(-90deg)" }} width={144} height={144}>
           <circle cx={72} cy={72} r={r} fill="none" stroke="#222" strokeWidth={10} />
           <circle cx={72} cy={72} r={r} fill="none" stroke="#fff" strokeWidth={10}
             strokeLinecap="round" strokeDasharray={`${dash} ${circ}`}
-            className="transition-all duration-700 ease-out" />
+            style={{ transition:"stroke-dasharray 0.7s cubic-bezier(0.4,0,0.2,1)" }} />
         </svg>
-        <div className="absolute inset-0 flex flex-col items-center justify-center">
-          <span className="text-[24px] font-bold leading-none">{currentScore}</span>
-          <span className="text-[12px] text-white/40 mt-[4px]">/{targetScore}점</span>
+        <div style={{ position:"absolute", inset:0, display:"flex", flexDirection:"column",
+                      alignItems:"center", justifyContent:"center" }}>
+          <span style={{ fontSize:28, fontWeight:900, lineHeight:1 }}>{currentScore}</span>
+          <span style={{ fontSize:12, color:"rgba(255,255,255,0.4)", marginTop:4 }}>/{targetScore}점</span>
         </div>
       </div>
-      <div className="text-center">
-        <p className="text-[12px] text-white/40 tracking-widest uppercase">{visaCode} → {targetVisa}</p>
-        <p className="text-[14px] text-white/70 mt-[4px]">D-{daysLeft}</p>
+      <div style={{ textAlign:"center" }}>
+        <p style={{ fontSize:12, color:"rgba(255,255,255,0.4)", letterSpacing:3, textTransform:"uppercase" }}>
+          {visaCode} → {targetVisa}
+        </p>
+        <p style={{ fontSize:14, color:"rgba(255,255,255,0.7)", marginTop:4 }}>D-{daysLeft}</p>
       </div>
-      <button onClick={() => updateVisaScore(5)}
-        className="w-full py-[12px] rounded-[16px] bg-white text-[#0A0A0A] text-[14px] font-bold
-                   hover:bg-white/90 active:scale-[0.98] transition-all duration-75">
+      <button onClick={() => updateVisaScore(5)} style={{
+        width:"100%", padding:"14px", borderRadius:16, backgroundColor:"#fff",
+        color:"#0A0A0A", fontSize:14, fontWeight:700, border:"none", cursor:"pointer", fontFamily:"inherit"
+      }}>
         내 스펙 갱신하기 +5
       </button>
     </div>

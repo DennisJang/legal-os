@@ -2,30 +2,37 @@
 import { useDashboardStore } from "@/store/useDashboardStore";
 
 const STATUS_MAP = {
-  SAFE:    { label: "안전", color: "#fff",    glow: "shadow-[0_0_32px_rgba(255,255,255,0.15)]" },
-  WARNING: { label: "주의", color: "#ffd700", glow: "shadow-[0_0_32px_rgba(255,215,0,0.25)]" },
-  DANGER:  { label: "위험", color: "#ff4444", glow: "shadow-[0_0_32px_rgba(255,68,68,0.25)]" },
+  SAFE:    { label: "안전", color: "#ffffff", shadow: "0 0 32px rgba(255,255,255,0.15)" },
+  WARNING: { label: "주의", color: "#ffd700", shadow: "0 0 32px rgba(255,215,0,0.25)" },
+  DANGER:  { label: "위험", color: "#ff4444", shadow: "0 0 32px rgba(255,68,68,0.25)" },
 };
 
 export default function SafeHomeWidget() {
   const { shieldStatus } = useDashboardStore();
-  const { label, color, glow } = STATUS_MAP[shieldStatus];
+  const { label, color, shadow } = STATUS_MAP[shieldStatus];
 
   return (
-    <div className={`flex flex-col items-center gap-[24px] rounded-[24px] bg-[#111] border border-white/10 p-8 ${glow}`}>
-      <span className="text-[12px] tracking-widest uppercase text-white/40">Safe-Home AI 스캐너</span>
+    <div style={{ display:"flex", flexDirection:"column", alignItems:"center", gap:24,
+                  borderRadius:24, backgroundColor:"#111111", border:"1px solid rgba(255,255,255,0.1)",
+                  padding:32, color:"#fff", boxShadow:shadow }}>
+      <span style={{ fontSize:11, letterSpacing:3, textTransform:"uppercase", color:"rgba(255,255,255,0.4)" }}>
+        Safe-Home AI 스캐너
+      </span>
       <svg width={80} height={96} viewBox="0 0 80 96" fill="none">
         <path d="M40 4L8 18v24c0 22 14.4 42.4 32 50 17.6-7.6 32-28 32-50V18L40 4z"
           fill={color} fillOpacity={0.12} stroke={color} strokeWidth={2} />
-        <path d="M28 48l8 8 16-16" stroke={color} strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" />
+        <path d="M28 48l8 8 16-16" stroke={color} strokeWidth={2.5}
+          strokeLinecap="round" strokeLinejoin="round" />
       </svg>
-      <div className="text-center">
-        <p className="text-[24px] font-bold" style={{ color }}>{label}</p>
-        <p className="text-[12px] text-white/40 mt-[4px]">계약서 AI 분석 완료</p>
+      <div style={{ textAlign:"center" }}>
+        <p style={{ fontSize:24, fontWeight:900, color }}>{label}</p>
+        <p style={{ fontSize:12, color:"rgba(255,255,255,0.4)", marginTop:4 }}>계약서 AI 분석 완료</p>
       </div>
-      <a href="/safe-home"
-        className="w-full py-[12px] rounded-[16px] border border-white/20 text-center text-[14px] font-bold
-                   hover:bg-white/5 active:scale-[0.98] transition-all duration-75 block">
+      <a href="/safe-home" style={{
+        display:"block", width:"100%", padding:"14px", borderRadius:16, textAlign:"center",
+        border:"1px solid rgba(255,255,255,0.2)", color:"#fff", textDecoration:"none",
+        fontSize:14, fontWeight:700
+      }}>
         계약서 스캔하기 →
       </a>
     </div>
