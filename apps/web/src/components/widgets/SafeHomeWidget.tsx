@@ -9,7 +9,7 @@ const STATUS_MAP = {
 
 export default function SafeHomeWidget() {
   const { shieldStatus } = useDashboardStore();
-  const { label, pill, text } = STATUS_MAP[shieldStatus];
+  const { label, pill, text } = STATUS_MAP[shieldStatus as keyof typeof STATUS_MAP];
 
   return (
     <div style={{ backgroundColor: "#FFFFFF", borderRadius: 18, overflow: "hidden", padding: 20 }}>

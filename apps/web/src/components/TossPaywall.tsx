@@ -1,7 +1,7 @@
 "use client";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { usePaymentStore } from "@/store/usePaymentStore";
+import { usePaymentStore } from "../store/usePaymentStore";
 
 declare const TossPayments: (clientKey: string) => {
   requestBillingAuth: (method: string, options: Record<string, string>) => Promise<void>;
