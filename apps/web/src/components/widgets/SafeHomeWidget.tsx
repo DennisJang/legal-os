@@ -2,37 +2,52 @@
 import { useDashboardStore } from "@/store/useDashboardStore";
 
 const STATUS_MAP = {
-  SAFE:    { label: "안전", color: "#ffffff", shadow: "0 0 32px rgba(255,255,255,0.15)" },
-  WARNING: { label: "주의", color: "#ffd700", shadow: "0 0 32px rgba(255,215,0,0.25)" },
-  DANGER:  { label: "위험", color: "#ff4444", shadow: "0 0 32px rgba(255,68,68,0.25)" },
+  SAFE:    { label: "안전", pill: "#34C759", text: "#fff" },
+  WARNING: { label: "주의", pill: "#FF9F0A", text: "#fff" },
+  DANGER:  { label: "위험", pill: "#FF3B30", text: "#fff" },
 };
 
 export default function SafeHomeWidget() {
   const { shieldStatus } = useDashboardStore();
-  const { label, color, shadow } = STATUS_MAP[shieldStatus];
+  const { label, pill, text } = STATUS_MAP[shieldStatus];
 
   return (
-    <div style={{ display:"flex", flexDirection:"column", alignItems:"center", gap:24,
-                  borderRadius:24, backgroundColor:"#111111", border:"1px solid rgba(255,255,255,0.1)",
-                  padding:32, color:"#fff", boxShadow:shadow }}>
-      <span style={{ fontSize:11, letterSpacing:3, textTransform:"uppercase", color:"rgba(255,255,255,0.4)" }}>
-        Safe-Home AI 스캐너
-      </span>
-      <svg width={80} height={96} viewBox="0 0 80 96" fill="none">
-        <path d="M40 4L8 18v24c0 22 14.4 42.4 32 50 17.6-7.6 32-28 32-50V18L40 4z"
-          fill={color} fillOpacity={0.12} stroke={color} strokeWidth={2} />
-        <path d="M28 48l8 8 16-16" stroke={color} strokeWidth={2.5}
-          strokeLinecap="round" strokeLinejoin="round" />
-      </svg>
-      <div style={{ textAlign:"center" }}>
-        <p style={{ fontSize:24, fontWeight:900, color }}>{label}</p>
-        <p style={{ fontSize:12, color:"rgba(255,255,255,0.4)", marginTop:4 }}>계약서 AI 분석 완료</p>
+    <div style={{ backgroundColor: "#FFFFFF", borderRadius: 18, overflow: "hidden", padding: 20 }}>
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16 }}>
+        <p style={{ fontSize: 13, color: "#86868B", margin: 0 }}>Safe-Home AI 스캐너</p>
+        {/* iOS Pill 뱃지 */}
+        <span style={{ fontSize: 13, fontWeight: 600, padding: "4px 12px",
+                       borderRadius: 9999, backgroundColor: pill, color: text }}>
+          {label}
+        </span>
       </div>
+
+      {/* 방패 아이콘 */}
+      <div style={{ display: "flex", justifyContent: "center", marginBottom: 16 }}>
+        <svg width={72} height={86} viewBox="0 0 80 96" fill="none">
+          <path d="M40 4L8 18v24c0 22 14.4 42.4 32 50 17.6-7.6 32-28 32-50V18L40 4z"
+            fill={pill} fillOpacity={0.1} stroke={pill} strokeWidth={2} />
+          <path d="M28 48l8 8 16-16" stroke={pill} strokeWidth={2.5}
+            strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+      </div>
+
+      <p style={{ fontSize: 13, color: "#86868B", textAlign: "center", margin: "0 0 16px" }}>
+        계약서 AI 분석 완료
+      </p>
+
+      {/* CTA — Apple Blue */}
       <a href="/safe-home" style={{
-        display:"block", width:"100%", padding:"14px", borderRadius:16, textAlign:"center",
-        border:"1px solid rgba(255,255,255,0.2)", color:"#fff", textDecoration:"none",
-        fontSize:14, fontWeight:700
-      }}>
+        display: "flex", alignItems: "center", justifyContent: "center",
+        width: "100%", height: 56, borderRadius: 14,
+        backgroundColor: "#0071E3", color: "#fff", textDecoration: "none",
+        fontSize: 17, fontWeight: 600, letterSpacing: "-0.022em",
+        transition: "all 100ms linear",
+      }}
+      onMouseDown={(e) => Object.assign((e.currentTarget as HTMLElement).style, { transform: "scale(0.97)", opacity: "0.8" })}
+      onMouseUp={(e)   => Object.assign((e.currentTarget as HTMLElement).style, { transform: "scale(1)",    opacity: "1"   })}
+      onMouseLeave={(e)=> Object.assign((e.currentTarget as HTMLElement).style, { transform: "scale(1)",    opacity: "1"   })}
+      >
         계약서 스캔하기 →
       </a>
     </div>

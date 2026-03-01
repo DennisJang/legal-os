@@ -15,44 +15,55 @@ export default function WageCalendarWidget() {
   useEffect(() => { setMounted(true); }, []);
 
   const now = mounted ? new Date() : new Date(0);
-  const year = now.getFullYear();
-  const month = now.getMonth();
-  const daysInMonth = mounted ? new Date(year, month + 1, 0).getDate() : 28;
-  const workedDays = mounted ? getThisMonthWorkedDays(workLogs, year, month) : 0;
+  const daysInMonth = mounted ? new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate() : 28;
+  const workedDays  = mounted ? getThisMonthWorkedDays(workLogs, now.getFullYear(), now.getMonth()) : 0;
   const monthlyWage = workedDays * dailyWage;
 
   return (
-    <div style={{ display:"flex", flexDirection:"column", gap:16, borderRadius:24,
-                  backgroundColor:"#111111", border:"1px solid rgba(255,255,255,0.1)",
-                  padding:32, color:"#fff" }}>
-      <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between" }}>
-        <span style={{ fontSize:11, letterSpacing:3, textTransform:"uppercase", color:"rgba(255,255,255,0.4)" }}>
-          이번 달 급여
-        </span>
-        <span style={{ fontSize:12, fontWeight:700, padding:"4px 8px", borderRadius:8,
-                       backgroundColor: clockedInToday ? "#fff" : "rgba(255,255,255,0.1)",
-                       color: clockedInToday ? "#0A0A0A" : "rgba(255,255,255,0.6)" }}>
-          {clockedInToday ? "출근 중 🟢" : "미출근"}
+    <div style={{ backgroundColor: "#FFFFFF", borderRadius: 18, overflow: "hidden", padding: 20 }}>
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
+        <p style={{ fontSize: 13, color: "#86868B", margin: 0 }}>이번 달 급여</p>
+        {/* iOS Green 토글 뱃지 */}
+        <span style={{
+          fontSize: 13, fontWeight: 600, padding: "4px 12px", borderRadius: 9999,
+          backgroundColor: clockedInToday ? "#34C759" : "#F5F5F7",
+          color: clockedInToday ? "#fff" : "#86868B",
+          transition: "all 250ms cubic-bezier(0.25,0.1,0.25,1)",
+        }}>
+          {clockedInToday ? "출근 중" : "미출근"}
         </span>
       </div>
-      <p style={{ fontSize:32, fontWeight:900, letterSpacing:"-0.5px" }}>
+
+      <h2 style={{ fontSize: 28, fontWeight: 700, letterSpacing: "-0.04em",
+                   color: "#1D1D1F", margin: "0 0 16px", lineHeight: 1.1 }}>
         {mounted ? `₩${monthlyWage.toLocaleString("ko-KR")}` : "₩—"}
-      </p>
-      <div style={{ display:"flex", gap:4 }}>
+      </h2>
+
+      {/* 날짜 도트 */}
+      <div style={{ display: "flex", gap: 3, marginBottom: 8 }}>
         {Array.from({ length: daysInMonth }, (_, i) => (
-          <div key={i} style={{ height:8, flex:1, borderRadius:99,
-                                 backgroundColor: i < workedDays ? "#fff" : "rgba(255,255,255,0.1)",
-                                 transition:"background-color 0.3s" }} />
+          <div key={i} style={{
+            height: 6, flex: 1, borderRadius: 99,
+            backgroundColor: i < workedDays ? "#0071E3" : "#F5F5F7",
+            transition: "background-color 250ms cubic-bezier(0.25,0.1,0.25,1)",
+          }} />
         ))}
       </div>
-      <p style={{ fontSize:12, color:"rgba(255,255,255,0.4)" }}>
+      <p style={{ fontSize: 13, color: "#86868B", margin: "0 0 16px" }}>
         {mounted ? `${workedDays}/${daysInMonth}일 · 일급 ₩${dailyWage.toLocaleString("ko-KR")}` : "로딩 중..."}
       </p>
+
       <button onClick={toggleClockIn} style={{
-        marginTop:8, padding:"14px", borderRadius:16, background:"transparent",
-        border:"1px solid rgba(255,255,255,0.2)", color:"#fff", fontSize:14,
-        fontWeight:700, cursor:"pointer", fontFamily:"inherit"
-      }}>
+        width: "100%", height: 56, borderRadius: 14, border: "none",
+        backgroundColor: clockedInToday ? "#F5F5F7" : "#0071E3",
+        color: clockedInToday ? "#1D1D1F" : "#fff",
+        fontSize: 17, fontWeight: 600, cursor: "pointer",
+        letterSpacing: "-0.022em", transition: "all 100ms linear", fontFamily: "inherit",
+      }}
+      onMouseDown={(e) => Object.assign(e.currentTarget.style, { transform: "scale(0.97)", opacity: "0.8" })}
+      onMouseUp={(e)   => Object.assign(e.currentTarget.style, { transform: "scale(1)",    opacity: "1"   })}
+      onMouseLeave={(e)=> Object.assign(e.currentTarget.style, { transform: "scale(1)",    opacity: "1"   })}
+      >
         {clockedInToday ? "퇴근 기록" : "출근 기록"}
       </button>
     </div>
