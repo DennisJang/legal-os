@@ -3,6 +3,7 @@ import VisaRingWidget from "@/components/widgets/VisaRingWidget";
 import WageCalendarWidget from "@/components/widgets/WageCalendarWidget";
 import SafeHomeWidget from "@/components/widgets/SafeHomeWidget";
 import MagicPalette from "@/components/MagicPalette";
+import GoogleAuthButton from "@/components/GoogleAuthButton";
 
 export default function DashboardPage() {
   return (
