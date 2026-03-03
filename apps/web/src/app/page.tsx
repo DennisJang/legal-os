@@ -59,7 +59,7 @@ export default function DashboardPage() {
               overflow: "hidden",
               transition: "all 100ms linear",
             }}
-            onMouseDown={(e) => Object.assign((e.currentTarget as HTMLElement).style, { transform: "scale(0.97)", opacity: "0.8" })}
+            onMouseDown={(e) => Object.assign((e.currentTarget as HTMLElement).style, { transform: "scale(0.96)", opacity: "0.8" })}
             onMouseUp={(e)   => Object.assign((e.currentTarget as HTMLElement).style, { transform: "scale(1)",    opacity: "1"   })}
             onMouseLeave={(e)=> Object.assign((e.currentTarget as HTMLElement).style, { transform: "scale(1)",    opacity: "1"   })}
             >

@@ -46,7 +46,7 @@ export default function MagicPalette() {
         boxShadow: "0 4px 24px rgba(0,113,227,0.3)",
         transition: "all 100ms linear", fontFamily: "inherit", zIndex: 40,
       }}
-      onMouseDown={(e) => Object.assign(e.currentTarget.style, { transform: "scale(0.97)", opacity: "0.8" })}
+      onMouseDown={(e) => Object.assign(e.currentTarget.style, { transform: "scale(0.96)", opacity: "0.8" })}
       onMouseUp={(e)   => Object.assign(e.currentTarget.style, { transform: "scale(1)",    opacity: "1"   })}
       onMouseLeave={(e)=> Object.assign(e.currentTarget.style, { transform: "scale(1)",    opacity: "1"   })}
       >

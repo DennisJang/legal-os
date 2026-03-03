@@ -19,10 +19,26 @@ const config: Config = {
           green: '#34C759',
         },
       },
+      spacing: {  
+        'safe' : '20px',
+        'section': '48px',
+      },
+      letterspacing: {
+        'h1': '-0.04em',
+        'h2': '-0.02em',
+        'body': '-0.022em',
+      },
+      borderradius: {
+        'card': '18px',
+        'btn': '14px',
+      },
       transitionTimingFunction: {
         'apple-spring': 'cubic-bezier(0.32, 0.72, 0, 1)',
         'apple-ease': 'cubic-bezier(0.25, 0.1, 0.25, 1)',
       },
+      backdropBlur: {
+        'glass': '20px'
+      }
     },
   },
   plugins: [],

@@ -38,7 +38,7 @@ export default function SafeHomeWidget() {
         fontSize: 17, fontWeight: 600, letterSpacing: "-0.022em",
         transition: "all 100ms linear",
       }}
-      onMouseDown={(e) => Object.assign((e.currentTarget as HTMLElement).style, { transform: "scale(0.97)", opacity: "0.8" })}
+      onMouseDown={(e) => Object.assign((e.currentTarget as HTMLElement).style, { transform: "scale(0.96)", opacity: "0.8" })}
       onMouseUp={(e)   => Object.assign((e.currentTarget as HTMLElement).style, { transform: "scale(1)",    opacity: "1"   })}
       onMouseLeave={(e)=> Object.assign((e.currentTarget as HTMLElement).style, { transform: "scale(1)",    opacity: "1"   })}
       >
