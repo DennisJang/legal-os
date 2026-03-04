@@ -32,11 +32,22 @@ type DashboardStore = {
 };
 
 export const useDashboardStore = create<DashboardStore>((set, get) => ({
-  user: null,
-  isHydrated: false,
+  user: {
+    id: 'dennis-ceo-001',
+    email: 'dennis@legal-os.com',
+    full_name: 'Dennis Jang',
+    nationality: 'South Korea', // 또는 해당 국가
+    current_score: 55,         // 링 게이지가 즉시 55% 지점까지 차오릅니다.
+    target_score: 80,          // 목표치 설정
+    current_visa_code: 'D-2',
+    target_visa_code: 'E-7',
+    current_annual_income: 30000000,
+    topik_level: 3
+  },
+  
+  isHydrated: true, // 로딩 상태를 즉시 종료하기 위해 true로 설정
   hydrate: (user) => set({ user, isHydrated: true }),
   reset: () => set({ user: null, isHydrated: false }),
-
   // [관제탑 패치] updateSpecOptimistic 액션
   updateSpecOptimistic: async (
     payload: SpecUpdatePayload,
