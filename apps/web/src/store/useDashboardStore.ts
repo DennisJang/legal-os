@@ -7,6 +7,24 @@ export interface SpecUpdatePayload {
   education_level?: string;
 }
 
+// ── [1] 백엔드 규격과 100% 일치하는 출퇴근 기록 타입 ──
+export interface DailyWorkLog {
+  work_date: string;          // "YYYY-MM-DD"
+  clock_in: string;           // 🚨 관제탑 패치: DB 컬럼명 일치
+  clock_out: string;          // 🚨 관제탑 패치: DB 컬럼명 일치
+  break_minutes: number;      // 🚨 관제탑 패치: 휴게시간 교체
+}
+
+export interface MonthlyWageResult {
+  base_pay: number;
+  night_bonus_pay: number;
+  overtime_pay: number;
+  weekly_holiday_pay: number;
+  total_pay: number;          // 🚨 관제탑 패치: 실제 반환키 일치
+  snapshot_min_wage: number;
+  target_month: string;
+}
+
 type UserProfile = {
   id: string;
   email: string;
@@ -23,81 +41,90 @@ type UserProfile = {
 type DashboardStore = {
   user: UserProfile | null;
   isHydrated: boolean;
+  markedDates: Set<string>;
+  monthlyWage: MonthlyWageResult | null;
+  wageLoading: boolean;
+
   hydrate: (user: UserProfile) => void;
   reset: () => void;
-  updateSpecOptimistic: (
-    payload: SpecUpdatePayload,
-    supabase: ReturnType<typeof createBrowserClient>
-  ) => Promise<void>;
+  updateSpecOptimistic: (payload: SpecUpdatePayload, supabase: ReturnType<typeof createBrowserClient>) => Promise<void>;
+  saveWorkLog: (log: DailyWorkLog, supabase: ReturnType<typeof createBrowserClient>) => Promise<void>;
 };
 
 export const useDashboardStore = create<DashboardStore>((set, get) => ({
-  user: {
-    id: 'dennis-ceo-001',
-    email: 'dennis@legal-os.com',
-    full_name: 'Dennis Jang',
-    nationality: 'South Korea', // 또는 해당 국가
-    current_score: 55,         // 링 게이지가 즉시 55% 지점까지 차오릅니다.
-    target_score: 80,          // 목표치 설정
-    current_visa_code: 'D-2',
-    target_visa_code: 'E-7',
-    current_annual_income: 30000000,
-    topik_level: 3
-  },
-  
-  isHydrated: true, // 로딩 상태를 즉시 종료하기 위해 true로 설정
-  hydrate: (user) => set({ user, isHydrated: true }),
-  reset: () => set({ user: null, isHydrated: false }),
-  // [관제탑 패치] updateSpecOptimistic 액션
-  updateSpecOptimistic: async (
-    payload: SpecUpdatePayload,
-    supabase: ReturnType<typeof createBrowserClient>
-  ) => {
-    const { user } = get();
-    if (!user) return; // 🛡️ [관제탑 패치] Null 방어막
+  user: null, // 🚨 관제탑 패치: 가짜 더미 삭제! 무조건 구글 로그인 UUID 사용
+  isHydrated: false,
+  markedDates: new Set<string>(),
+  monthlyWage: null,
+  wageLoading: false,
 
-    // ── STEP 1: 롤백용 스냅샷 깊은 복사
+  hydrate: (user) => set({ user, isHydrated: true }),
+  reset: () => set({ user: null, isHydrated: false, markedDates: new Set(), monthlyWage: null }),
+
+  updateSpecOptimistic: async (payload, supabase) => {
+    const { user } = get();
+    if (!user) return; 
+
     const snapshot = {
       current_score: user.current_score,
       current_annual_income: user.current_annual_income,
       topik_level: user.topik_level,
     };
 
-    // ── STEP 2: 낙관적 선반영 (도파민 루프) — 간이 점수 +5 즉각 반영
     const optimisticScore = Math.min((user.current_score ?? 0) + 5, user.target_score ?? 100);
     set({ user: { ...user, ...payload, current_score: optimisticScore } });
 
     try {
-      // ── STEP 3: 백엔드 RPC 호출 (🚨 관제탑 패치: Domain A 파라미터명과 정확히 매칭)
       const { error } = await supabase.rpc('update_user_spec', { 
         p_new_income: payload.current_annual_income ?? user.current_annual_income ?? 0,
         p_new_topik: payload.topik_level ?? user.topik_level ?? 0
       });
-      
       if (error) throw error;
 
-      // ── STEP 4: 성공 시 진짜 DB 점수로 싱크
-      const { data } = await supabase
-        .from('visa_trackers')
-        .select('current_score')
-        .eq('user_id', user.id) // 명시적 RLS
-        .single();
-        
+      const { data } = await supabase.from('visa_trackers').select('current_score').eq('user_id', user.id).single();
       if (data) {
         const currentUser = get().user;
-        if (currentUser) {
-          set({ user: { ...currentUser, current_score: data.current_score } });
-        }
+        if (currentUser) set({ user: { ...currentUser, current_score: data.current_score } });
       }
-
     } catch (error) {
-      // ── STEP 5: 실패 시 즉각 원래 상태로 롤백
       console.error("[Optimistic Update Failed]:", error);
       const currentUser = get().user;
-      if (currentUser) {
-        set({ user: { ...currentUser, ...snapshot } });
-      }
-      alert('네트워크 오류가 발생했습니다. 변경사항이 롤백됩니다.');
+      if (currentUser) set({ user: { ...currentUser, ...snapshot } });
+      alert('네트워크 오류가 발생했습니다.');
+    }
+  },
+
+  // ── [3] saveWorkLog: 달력 기록 & Edge Function 연동 ──
+  saveWorkLog: async (log, supabase) => {
+    const { user } = get();
+    if (!user) return;
+
+    const prev = new Set(get().markedDates);
+    set({ markedDates: new Set([...prev, log.work_date]) });
+
+    try {
+      const { error: dbError } = await supabase
+        .from('daily_work_logs')
+        .upsert({ user_id: user.id, ...log }, { onConflict: 'user_id,work_date' });
+      
+      if (dbError) throw dbError;
+
+      set({ wageLoading: true });
+      const yearMonth = log.work_date.slice(0, 7);
+      
+      // 🚨 관제탑 패치: RPC 직접 호출 금지. Edge Function 호출.
+      const { data, error: fnError } = await supabase.functions.invoke('get-wage-summary', {
+        body: { target_month: yearMonth }
+      });
+
+      if (fnError || !data?.success) throw fnError || new Error(data?.error);
+      
+      set({ monthlyWage: data.data, wageLoading: false });
+
+    } catch (err) {
+      console.error('[saveWorkLog failed]', err);
+      set({ markedDates: prev, wageLoading: false });
+      alert('출퇴근 기록 저장 중 오류가 발생했습니다.');
     }
   },
 }));

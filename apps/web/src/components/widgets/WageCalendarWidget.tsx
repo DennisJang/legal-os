@@ -1,64 +1,114 @@
-"use client";
-import { useState, useEffect } from "react";
+'use client';
+import { useState, useEffect, useRef } from 'react';
+import { useDashboardStore } from '@/store/useDashboardStore';
+import DailyLogBottomSheet from '@/components/DailyLogBottomSheet';
+
+function useCountUp(target: number, duration = 500) {
+  const [display, setDisplay] = useState(target);
+  const prev = useRef(target);
+  
+  useEffect(() => {
+    const start = prev.current;
+    const diff  = target - start;
+    if (diff === 0) return;
+    
+    const startTime = performance.now();
+    const tick = (now: number) => {
+      const p = Math.min((now - startTime) / duration, 1);
+      setDisplay(Math.round(start + diff * p));
+      if (p < 1) requestAnimationFrame(tick);
+      else prev.current = target;
+    };
+    requestAnimationFrame(tick);
+  }, [target, duration]);
+  
+  return display;
+}
+
+function buildCalendarDays(year: number, month: number): (number | null)[] {
+  const firstDay = new Date(year, month, 1).getDay();
+  const lastDate = new Date(year, month + 1, 0).getDate();
+  return [...Array(firstDay).fill(null), ...Array.from({ length: lastDate }, (_, i) => i + 1)];
+}
 
 export default function WageCalendarWidget() {
-  const [clockedIn, setClockedIn]   = useState(false);
-  const [workedDays, setWorkedDays] = useState(0);
-  const [mounted, setMounted]       = useState(false);
-  useEffect(() => { setMounted(true); }, []);
-
-  const now          = mounted ? new Date() : new Date(0);
-  const daysInMonth  = mounted ? new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate() : 28;
-  const dailyWage    = 80000; // 추후 user_profiles.current_annual_income 연동
-  const monthlyWage  = workedDays * dailyWage;
-
-  const toggleClockIn = () => {
-    setClockedIn((v) => !v);
-    if (!clockedIn) setWorkedDays((d) => d + 1);
-  };
+  const { markedDates, monthlyWage, wageLoading } = useDashboardStore();
+  const [selectedDate, setSelectedDate] = useState<string | null>(null);
+  
+  const now    = new Date();
+  const year   = now.getFullYear();
+  const month  = now.getMonth();
+  const days   = buildCalendarDays(year, month);
+  
+  // 🚨 관제탑 패치: Domain C 실제 리턴값인 total_pay 사용
+  const totalWage   = monthlyWage?.total_pay ?? 0;
+  const displayWage = useCountUp(totalWage);  
 
   return (
-    <div style={{ backgroundColor: "#FFFFFF", borderRadius: 18, overflow: "hidden", padding: 20 }}>
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
-        <p style={{ fontSize: 13, color: "#86868B", margin: 0 }}>이번 달 급여</p>
-        <span style={{
-          fontSize: 13, fontWeight: 600, padding: "4px 12px", borderRadius: 9999,
-          backgroundColor: clockedIn ? "#34C759" : "#F5F5F7",
-          color: clockedIn ? "#fff" : "#86868B",
-          transition: "all 250ms cubic-bezier(0.25,0.1,0.25,1)",
-        }}>
-          {clockedIn ? "출근 중" : "미출근"}
-        </span>
+    <>
+      <div className="bg-[#FFFFFF] rounded-[18px] overflow-hidden p-5"
+           style={{ boxShadow: '0 4px 24px rgba(0,0,0,0.06)' }}>
+
+        <p className="text-[13px] text-[#86868B] mb-1">
+          {year}년 {month + 1}월 합법 예상 급여
+        </p>
+        <div className="h-[40px] mb-4 flex items-center">
+          {wageLoading ? (
+            <span className="text-[#86868B] text-[24px] font-bold tracking-[-0.04em] animate-pulse">계산 중...</span>
+          ) : (
+            <p className="text-[34px] font-bold tracking-[-0.04em] text-[#1D1D1F] leading-[1.1]">
+              ₩{displayWage.toLocaleString()}
+            </p>
+          )}
+        </div>
+
+        <div className="grid grid-cols-7 mb-2">
+          {['일','월','화','수','목','금','토'].map(d => (
+            <p key={d} className="text-center text-[11px] text-[#86868B] py-1">{d}</p>
+          ))}
+        </div>
+
+        <div className="grid grid-cols-7 gap-y-1">
+          {days.map((day, i) => {
+            if (!day) return <div key={`empty-${i}`} />;
+            const dateStr = `${year}-${String(month + 1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+            const isMarked = markedDates.has(dateStr);
+            const isToday  = day === now.getDate() && month === now.getMonth() && year === now.getFullYear();
+            
+            return (
+              <button
+                key={dateStr}
+                onClick={() => setSelectedDate(dateStr)}
+                onMouseDown={e => Object.assign(e.currentTarget.style, { transform: 'scale(0.96)' })}
+                onMouseUp={e => Object.assign(e.currentTarget.style, { transform: 'scale(1)' })}
+                onMouseLeave={e => Object.assign(e.currentTarget.style, { transform: 'scale(1)' })}
+                className="flex flex-col items-center py-1.5 rounded-[10px]"
+                style={{
+                  transition: 'all 100ms linear',
+                  background: isToday ? '#0071E3' : 'transparent',
+                }}
+              >
+                <span className="text-[15px] font-medium leading-none"
+                  style={{ color: isToday ? '#FFFFFF' : '#1D1D1F' }}>
+                  {day}
+                </span>
+                {/* 출근 완료 도트 */}
+                {isMarked && (
+                  <span className="mt-1 w-[4px] h-[4px] rounded-full"
+                        style={{ background: isToday ? '#FFFFFF' : '#0071E3' }} />
+                )}
+              </button>
+            );
+          })}
+        </div>
       </div>
-      <h2 style={{ fontSize: 28, fontWeight: 700, letterSpacing: "-0.04em",
-                   color: "#1D1D1F", margin: "0 0 16px", lineHeight: 1.1 }}>
-        {mounted ? `₩${monthlyWage.toLocaleString("ko-KR")}` : "₩—"}
-      </h2>
-      <div style={{ display: "flex", gap: 3, marginBottom: 8 }}>
-        {Array.from({ length: daysInMonth }, (_, i) => (
-          <div key={i} style={{
-            height: 6, flex: 1, borderRadius: 99,
-            backgroundColor: i < workedDays ? "#0071E3" : "#F5F5F7",
-            transition: "background-color 250ms cubic-bezier(0.25,0.1,0.25,1)",
-          }} />
-        ))}
-      </div>
-      <p style={{ fontSize: 13, color: "#86868B", margin: "0 0 16px" }}>
-        {mounted ? `${workedDays}/${daysInMonth}일 · 일급 ₩${dailyWage.toLocaleString("ko-KR")}` : "로딩 중..."}
-      </p>
-      <button onClick={toggleClockIn} style={{
-        width: "100%", height: 56, borderRadius: 14, border: "none",
-        backgroundColor: clockedIn ? "#F5F5F7" : "#0071E3",
-        color: clockedIn ? "#1D1D1F" : "#fff",
-        fontSize: 17, fontWeight: 600, cursor: "pointer",
-        letterSpacing: "-0.022em", transition: "all 100ms linear", fontFamily: "inherit",
-      }}
-      onMouseDown={(e) => Object.assign(e.currentTarget.style, { transform: "scale(0.96)", opacity: "0.8" })}
-      onMouseUp={(e)   => Object.assign(e.currentTarget.style, { transform: "scale(1)",    opacity: "1"   })}
-      onMouseLeave={(e)=> Object.assign(e.currentTarget.style, { transform: "scale(1)",    opacity: "1"   })}
-      >
-        {clockedIn ? "퇴근 기록" : "출근 기록"}
-      </button>
-    </div>
+
+      {selectedDate && (
+        <DailyLogBottomSheet
+          date={selectedDate}
+          onClose={() => setSelectedDate(null)}
+        />
+      )}
+    </>
   );
 }
