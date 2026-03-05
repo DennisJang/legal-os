@@ -1,12 +1,12 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.3";
-import { PDFDocument } from "https://cdn.skypack.dev/pdf-lib@1.17.1?dts";
+import { PDFDocument } from "https://esm.sh/pdf-lib@1.17.1";
 
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-const POPBILL_LINK_ID = Deno.env.get("POPBILL_LINK_ID") ?? "TEST_LINK_ID";
-const POPBILL_SECRET_KEY = Deno.env.get("POPBILL_SECRET_KEY") ?? "TEST_SECRET_KEY";
-const POPBILL_SENDER_NUM = Deno.env.get("POPBILL_SENDER_NUM") ?? "020000000";
+const _POPBILL_LINK_ID = Deno.env.get("POPBILL_LINK_ID") ?? "TEST_LINK_ID";
+const _POPBILL_SECRET_KEY = Deno.env.get("POPBILL_SECRET_KEY") ?? "TEST_SECRET_KEY";
+const _POPBILL_SENDER_NUM = Deno.env.get("POPBILL_SENDER_NUM") ?? "020000000";
 
 const A4_WIDTH = 595;
 const A4_HEIGHT = 842;
@@ -80,11 +80,11 @@ serve(async (req: Request) => {
   });
 
   const pdfBytes = await pdfDoc.save();
-  const pdfBase64 = btoa(String.fromCharCode.apply(null, Array.from(pdfBytes)));
+  const _pdfBase64 = btoa(String.fromCharCode.apply(null, Array.from(pdfBytes)));
 
   // ── Step 4: Popbill 전송 
   // 기본적으로는 무작위 UUID를 생성하되, 실제 Popbill 발송 시 응답에 포함된 접수번호를 사용합니다.
-  let receiptNum = crypto.randomUUID(); // MVP Test Random ID (실제 연동 시 Popbill Response 파싱 필요)
+  const receiptNum = crypto.randomUUID(); // MVP Test Random ID (실제 연동 시 Popbill Response 파싱 필요)
   
   /* [MVP 테스트 기간 동안은 Popbill 실제 발송은 주석 처리 또는 에러 패스]
   const popbillRes = await fetch(`https://fax.popbill.com/FAX/SendFAX`, {
