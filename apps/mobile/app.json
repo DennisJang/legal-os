@@ -1,30 +1,37 @@
 {
   "expo": {
-    "name": "mobile",
-    "slug": "mobile",
+    "name": "legal-os",
+    "slug": "legal-os",
     "version": "1.0.0",
-    "orientation": "portrait",
-    "icon": "./assets/icon.png",
-    "userInterfaceStyle": "light",
-    "splash": {
-      "image": "./assets/splash-icon.png",
-      "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
-    },
+    "platforms": ["ios", "android"],
     "ios": {
-      "supportsTablet": true
+      "bundleIdentifier": "com.legalos.app",
+      "infoPlist": {
+        "NSCameraUsageDescription": "원룸 계약서의 독소 조항을 스캔하고 분석하기 위해 카메라 접근 권한이 필요합니다.",
+        "NSPhotoLibraryUsageDescription": "갤러리에 저장된 계약서 이미지를 불러오기 위해 사진 접근 권한이 필요합니다.",
+        "NSPhotoLibraryAddUsageDescription": "스캔한 계약서 이미지를 저장하기 위해 사진 라이브러리 권한이 필요합니다."
+      }
     },
     "android": {
-      "adaptiveIcon": {
-        "backgroundColor": "#E6F4FE",
-        "foregroundImage": "./assets/android-icon-foreground.png",
-        "backgroundImage": "./assets/android-icon-background.png",
-        "monochromeImage": "./assets/android-icon-monochrome.png"
-      },
-      "predictiveBackGestureEnabled": false
+      "package": "com.legalos.app",
+      "permissions": [
+        "android.permission.CAMERA",
+        "android.permission.READ_EXTERNAL_STORAGE",
+        "android.permission.WRITE_EXTERNAL_STORAGE"
+      ]
     },
-    "web": {
-      "favicon": "./assets/favicon.png"
-    }
+    "plugins": [
+      [
+        "expo-camera",
+        { "cameraPermission": "계약서 스캔을 위해 카메라 접근 권한이 필요합니다." }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "계약서 이미지를 앨범에서 선택하기 위해 사진 접근 권한이 필요합니다.",
+          "cameraPermission": "계약서 촬영을 위해 카메라 접근 권한이 필요합니다."
+        }
+      ]
+    ]
   }
 }
