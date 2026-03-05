@@ -7,12 +7,11 @@ export interface SpecUpdatePayload {
   education_level?: string;
 }
 
-// ── [1] 백엔드 규격과 100% 일치하는 출퇴근 기록 타입 ──
 export interface DailyWorkLog {
-  work_date: string;          // "YYYY-MM-DD"
-  clock_in: string;           // 🚨 관제탑 패치: DB 컬럼명 일치
-  clock_out: string;          // 🚨 관제탑 패치: DB 컬럼명 일치
-  break_minutes: number;      // 🚨 관제탑 패치: 휴게시간 교체
+  work_date: string;
+  clock_in: string;
+  clock_out: string;
+  break_minutes: number;
 }
 
 export interface MonthlyWageResult {
@@ -20,9 +19,21 @@ export interface MonthlyWageResult {
   night_bonus_pay: number;
   overtime_pay: number;
   weekly_holiday_pay: number;
-  total_pay: number;          // 🚨 관제탑 패치: 실제 반환키 일치
+  total_pay: number;
   snapshot_min_wage: number;
   target_month: string;
+}
+
+// ── [NEW] 팩스 Payload 타입 ──
+export interface FaxPayload {
+  userId: string;
+  zipcode: string;
+  contractData?: Record<string, unknown>;
+  arc_image_url: string;
+  form_template_path: string;
+  idempotency_key: string;
+  document_type: string;
+  liability_agreed?: boolean;
 }
 
 type UserProfile = {
@@ -39,6 +50,7 @@ type UserProfile = {
 };
 
 type DashboardStore = {
+  // ── 기존 상태 ──
   user: UserProfile | null;
   isHydrated: boolean;
   markedDates: Set<string>;
@@ -49,10 +61,18 @@ type DashboardStore = {
   reset: () => void;
   updateSpecOptimistic: (payload: SpecUpdatePayload, supabase: ReturnType<typeof createBrowserClient>) => Promise<void>;
   saveWorkLog: (log: DailyWorkLog, supabase: ReturnType<typeof createBrowserClient>) => Promise<void>;
+
+  // ── [NEW] 팩스 면책 동의 상태 ──
+  isDisclaimerOpen: boolean;
+  pendingFaxPayload: FaxPayload | null;
+  openDisclaimer: (payload: FaxPayload) => void;
+  closeDisclaimer: () => void;
+  submitFaxWithLiability: (supabase: ReturnType<typeof createBrowserClient>) => Promise<void>;
 };
 
 export const useDashboardStore = create<DashboardStore>((set, get) => ({
-  user: null, // 🚨 관제탑 패치: 가짜 더미 삭제! 무조건 구글 로그인 UUID 사용
+  // ── 기존 초기값 ──
+  user: null,
   isHydrated: false,
   markedDates: new Set<string>(),
   monthlyWage: null,
@@ -63,7 +83,7 @@ export const useDashboardStore = create<DashboardStore>((set, get) => ({
 
   updateSpecOptimistic: async (payload, supabase) => {
     const { user } = get();
-    if (!user) return; 
+    if (!user) return;
 
     const snapshot = {
       current_score: user.current_score,
@@ -75,9 +95,9 @@ export const useDashboardStore = create<DashboardStore>((set, get) => ({
     set({ user: { ...user, ...payload, current_score: optimisticScore } });
 
     try {
-      const { error } = await supabase.rpc('update_user_spec', { 
+      const { error } = await supabase.rpc('update_user_spec', {
         p_new_income: payload.current_annual_income ?? user.current_annual_income ?? 0,
-        p_new_topik: payload.topik_level ?? user.topik_level ?? 0
+        p_new_topik: payload.topik_level ?? user.topik_level ?? 0,
       });
       if (error) throw error;
 
@@ -94,7 +114,6 @@ export const useDashboardStore = create<DashboardStore>((set, get) => ({
     }
   },
 
-  // ── [3] saveWorkLog: 달력 기록 & Edge Function 연동 ──
   saveWorkLog: async (log, supabase) => {
     const { user } = get();
     if (!user) return;
@@ -106,25 +125,46 @@ export const useDashboardStore = create<DashboardStore>((set, get) => ({
       const { error: dbError } = await supabase
         .from('daily_work_logs')
         .upsert({ user_id: user.id, ...log }, { onConflict: 'user_id,work_date' });
-      
+
       if (dbError) throw dbError;
 
       set({ wageLoading: true });
       const yearMonth = log.work_date.slice(0, 7);
-      
-      // 🚨 관제탑 패치: RPC 직접 호출 금지. Edge Function 호출.
+
       const { data, error: fnError } = await supabase.functions.invoke('get-wage-summary', {
-        body: { target_month: yearMonth }
+        body: { target_month: yearMonth },
       });
 
       if (fnError || !data?.success) throw fnError || new Error(data?.error);
-      
-      set({ monthlyWage: data.data, wageLoading: false });
 
+      set({ monthlyWage: data.data, wageLoading: false });
     } catch (err) {
       console.error('[saveWorkLog failed]', err);
       set({ markedDates: prev, wageLoading: false });
       alert('출퇴근 기록 저장 중 오류가 발생했습니다.');
+    }
+  },
+
+  // ── [NEW] 팩스 면책 동의 액션 ──
+  isDisclaimerOpen: false,
+  pendingFaxPayload: null,
+
+  openDisclaimer: (payload) => set({ isDisclaimerOpen: true, pendingFaxPayload: payload }),
+  closeDisclaimer: () => set({ isDisclaimerOpen: false, pendingFaxPayload: null }),
+
+  submitFaxWithLiability: async (supabase) => {
+    const { pendingFaxPayload, closeDisclaimer } = get();
+    if (!pendingFaxPayload) return;
+    try {
+      const { data, error } = await supabase.functions.invoke('send-immigration-fax', {
+        body: { ...pendingFaxPayload, liability_agreed: true },
+      });
+      if (error || (data && !data.success)) throw error || new Error(data?.error);
+      alert('성공적으로 관공서 팩스 발송 대기열에 등록되었습니다!');
+      closeDisclaimer();
+    } catch (err) {
+      console.error('[Fax Submission Failed]:', err);
+      alert('팩스 발송 중 오류가 발생했습니다. 다시 시도해주세요.');
     }
   },
 }));
