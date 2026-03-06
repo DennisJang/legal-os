@@ -1,42 +1,35 @@
 "use client";
-
 import { useEffect, useRef, useState } from "react";
 import { loadPaymentWidget, PaymentWidgetInstance } from "@tosspayments/payment-widget-sdk";
-import GoogleAuthButton from "@/components/GoogleAuthButton"; // 🎯 오염 소거 및 완벽한 Import
+import GoogleAuthButton from "@/components/GoogleAuthButton";
 
 export default function TossPaywall() {
-  const paymentWidgetRef = useRef<PaymentWidgetInstance | null>(null);
-  const paymentMethodsWidgetRef = useRef<any>(null);
-  const [isLoaded, setIsLoaded] = useState(false);
+  const paymentWidgetRef         = useRef<PaymentWidgetInstance | null>(null);
+  const paymentMethodsWidgetRef  = useRef<any>(null);
+  const [isLoaded, setIsLoaded]  = useState(false);
 
   useEffect(() => {
     (async () => {
-      // ⚠️ TOSS 클라이언트 키 (환경변수 누락 시 테스트 키 작동)
-      const clientKey = process.env.NEXT_PUBLIC_TOSS_CLIENT_KEY || "test_ck_D5GePWvyJnrK0W0k6q8gLzN97Eoq";
+      const clientKey  = process.env.NEXT_PUBLIC_TOSS_CLIENT_KEY || "test_ck_D5GePWvyJnrK0W0k6q8gLzN97Eoq";
       const customerKey = "generate-random-or-use-uid";
-
       const paymentWidget = await loadPaymentWidget(clientKey, customerKey);
       const paymentMethodsWidget = paymentWidget.renderPaymentMethods(
-        "#payment-widget",
-        { value: 4900 },
-        { variantKey: "DEFAULT" }
+        "#payment-widget", { value: 4900 }, { variantKey: "DEFAULT" }
       );
       paymentWidget.renderAgreement("#agreement", { variantKey: "AGREEMENT" });
-
-      paymentWidgetRef.current = paymentWidget;
-      paymentMethodsWidgetRef.current = paymentMethodsWidget;
+      paymentWidgetRef.current         = paymentWidget;
+      paymentMethodsWidgetRef.current  = paymentMethodsWidget;
       setIsLoaded(true);
     })();
   }, []);
 
   const handlePayment = async () => {
-    const paymentWidget = paymentWidgetRef.current;
     try {
-      await paymentWidget?.requestPayment({
-        orderId: `order_${Date.now()}`,
+      await paymentWidgetRef.current?.requestPayment({
+        orderId:   `order_${Date.now()}`,
         orderName: "LEGAL-OS 구독 (월 4,900원)",
         successUrl: `${window.location.origin}/dashboard`,
-        failUrl: `${window.location.origin}/`,
+        failUrl:    `${window.location.origin}/`,
       });
     } catch (error) {
       console.error("결제 에러:", error);
@@ -44,43 +37,66 @@ export default function TossPaywall() {
   };
 
   return (
-    <div className="w-full bg-[#FFFFFF] rounded-[18px] p-5 shadow-[0_4px_24px_rgba(0,0,0,0.06)] overflow-hidden">
-      {/* 1. 타이틀 영역 */}
-      <h2 className="text-[24px] font-semibold text-[#1D1D1F] tracking-[-0.02em] leading-[1.2] mb-2">
+    <div style={{
+      width: "100%", backgroundColor: "#FFFFFF",
+      borderRadius: 18, padding: 20, overflow: "hidden",
+      /* 헌법: box-shadow 옅고 넓게만 허용 */
+      boxShadow: "0 8px 32px rgba(0, 0, 0, 0.08)",
+    }}>
+      {/* 타이틀 */}
+      <h2 style={{
+        fontSize: 24, fontWeight: 700, color: "#1D1D1F",
+        letterSpacing: "-0.02em", lineHeight: 1.2, marginBottom: 8,
+        fontFamily: `-apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif`,
+      }}>
         LEGAL-OS 시작하기
       </h2>
-      <p className="text-[13px] font-normal text-[#86868B] leading-[1.3] mb-6">
+      <p style={{
+        fontSize: 13, color: "#86868B", lineHeight: 1.5, marginBottom: 24,
+        fontFamily: `-apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif`,
+      }}>
         월 4,900원으로 체류자격 유지와 임금 보호를 100% 자동화하세요.
       </p>
 
-      {/* 2. 구글 로그인 버튼 (최상단 배치) */}
-      <div className="mb-6">
+      {/* Google 로그인 */}
+      <div style={{ marginBottom: 24 }}>
         <GoogleAuthButton />
       </div>
 
-      <div className="flex items-center justify-center gap-2 mb-6">
-        <div className="h-px bg-[#F5F5F7] flex-1"></div>
-        <span className="text-[13px] text-[#86868B]">또는 카드로 결제하기</span>
-        <div className="h-px bg-[#F5F5F7] flex-1"></div>
+      {/* Divider */}
+      <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 24 }}>
+        <div style={{ flex: 1, height: 0.5, backgroundColor: "#E5E5EA" }} />
+        <span style={{
+          fontSize: 13, color: "#86868B",
+          fontFamily: `-apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif`,
+        }}>
+          또는 카드로 결제하기
+        </span>
+        <div style={{ flex: 1, height: 0.5, backgroundColor: "#E5E5EA" }} />
       </div>
 
-      {/* 3. 토스 결제 위젯 */}
-      <div id="payment-widget" className="mb-2" />
-      <div id="agreement" className="mb-6" />
+      {/* Toss 위젯 — 로직 동결 */}
+      <div id="payment-widget" style={{ marginBottom: 8 }} />
+      <div id="agreement"      style={{ marginBottom: 24 }} />
 
-      {/* 4. 결제 액션 버튼 */}
+      {/* CTA */}
       <button
         onClick={handlePayment}
         disabled={!isLoaded}
-        className="
-          w-full h-[56px] rounded-[14px]
-          bg-[#0071E3] text-[#FFFFFF]
-          font-semibold text-[17px]
-          flex items-center justify-center
-          active:scale-[0.97] active:opacity-80
-          transition-all duration-100 linear
-          disabled:opacity-50 disabled:active:scale-100
-        "
+        style={{
+          width: "100%", height: 56, borderRadius: 14, border: "none",
+          backgroundColor: isLoaded ? "#0071E3" : "#E5E5EA",
+          color: isLoaded ? "#fff" : "#86868B",
+          fontSize: 17, fontWeight: 600, letterSpacing: "-0.022em",
+          display: "flex", alignItems: "center", justifyContent: "center",
+          cursor: isLoaded ? "pointer" : "not-allowed",
+          boxShadow: "none",
+          transition: "transform 100ms linear, opacity 100ms linear, background 200ms ease",
+          fontFamily: `-apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif`,
+        }}
+        onMouseDown={e => { if (isLoaded) Object.assign(e.currentTarget.style, { transform: "scale(0.96)", opacity: "0.8" }); }}
+        onMouseUp={e =>    Object.assign(e.currentTarget.style, { transform: "scale(1)",    opacity: "1"   })}
+        onMouseLeave={e => Object.assign(e.currentTarget.style, { transform: "scale(1)",    opacity: "1"   })}
       >
         월 4,900원 구독하기
       </button>

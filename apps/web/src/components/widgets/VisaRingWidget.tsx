@@ -1,83 +1,115 @@
-'use client';
-import { useState } from 'react';
-import { useDashboardStore } from '@/store/useDashboardStore';
-import SpecUpdateModal from '@/components/SpecUpdateModal';
+"use client";
 
-const RADIUS = 54;
-const CIRCUMFERENCE = 2 * Math.PI * RADIUS;
+import { useEffect, useRef, useState } from "react";
 
-export default function VisaRingWidget() {
-  const { user } = useDashboardStore();
-  const [showModal, setShowModal] = useState(false);
+interface VisaRingWidgetProps {
+  score:       number;
+  target:      number;
+  label:       string;
+  size?:       "sm" | "md" | "lg";
+  optimistic?: boolean;
+  expiryDays?: number;
+  onUpdate?:   () => void;
+}
 
-  // 🛡️ [관제탑 패치] Null 크래시 방어 (마운트 전 하얀 화면 방지)
-  if (!user) return <div className="h-[140px] bg-white rounded-[18px] animate-pulse" />;
+const SIZES = {
+  sm: { outer: 80,  r: 33, sw: 6, fs: 18, sub: 10 },
+  md: { outer: 112, r: 47, sw: 7, fs: 24, sub: 11 },
+  lg: { outer: 136, r: 57, sw: 8, fs: 28, sub: 12 },
+};
 
-  const score      = user.current_score ?? 0;
-  const target     = user.target_score  ?? 100;
-  const visaCode   = user.current_visa_code ?? "—";
-  const targetVisa = user.target_visa_code ?? "—";
+const ringColor = (pct: number) =>
+  pct >= 0.8 ? "#34C759" : pct >= 0.5 ? "#FF9500" : "#FF3B30";
 
-  // 🛡️ [관제탑 패치] target이 0일 때 NaN 크래시 방어 (target || 1)
-  const pct    = Math.min(score / (target || 1), 1);
-  const offset = CIRCUMFERENCE * (1 - pct);
+const SF: React.CSSProperties = {
+  fontFamily: `-apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", sans-serif`,
+};
+
+export default function VisaRingWidget({
+  score, target, label, size = "md", optimistic = false, expiryDays, onUpdate,
+}: VisaRingWidgetProps) {
+  const { outer, r, sw, fs, sub } = SIZES[size];
+  const circ   = 2 * Math.PI * r;
+  const pct    = Math.min(score / target, 1);
+  const offset = circ * (1 - pct);
+  const color  = ringColor(pct);
+  const cx = outer / 2;
+  const cy = outer / 2;
+
+  const [displayed, setDisplayed] = useState(0);
+  const [numPop,    setNumPop]    = useState(false);
+  const prev = useRef(score);
+
+  useEffect(() => { setDisplayed(score); }, []);
+
+  useEffect(() => {
+    if (prev.current === score) return;
+    const diff = score - displayed, steps = 20, step = diff / steps;
+    let i = 0;
+    const t = setInterval(() => {
+      setDisplayed(v => { const n = v + step; if (++i >= steps) { clearInterval(t); return score; } return n; });
+    }, 30);
+    prev.current = score;
+    setNumPop(true);
+    setTimeout(() => setNumPop(false), 600);
+    return () => clearInterval(t);
+  }, [score]);
 
   return (
-    <>
-      <div
-        className="bg-[#FFFFFF] rounded-[18px] overflow-hidden p-5"
-        style={{ boxShadow: '0 4px 24px rgba(0,0,0,0.06)' }}
-      >
-        <p className="text-[13px] text-[#86868B] mb-4">비자 트래커</p>
+    <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 8 }}>
+      <div style={{ position: "relative", width: outer, height: outer }}>
+        <svg width={outer} height={outer} style={{ transform: "rotate(-90deg)", overflow: "visible" }}>
+          <circle cx={cx} cy={cy} r={r} fill="none" stroke="#E5E5EA" strokeWidth={sw} />
+          <circle
+            cx={cx} cy={cy} r={r} fill="none"
+            stroke={color} strokeWidth={sw} strokeLinecap="round"
+            strokeDasharray={circ} strokeDashoffset={offset}
+            style={{ transition: "stroke-dashoffset 800ms cubic-bezier(0.25,0.1,0.25,1), stroke 400ms ease" }}
+          />
+        </svg>
 
-        {/* 🛡️ 기존의 공간 효율적인 가로(Row) 레이아웃 원복 */}
-        <div className="flex items-center gap-5">
-          {/* SVG 링 영역 */}
-          <div className="relative w-[100px] h-[100px] shrink-0">
-            <svg viewBox="0 0 140 140" className="w-[100px] h-[100px] transform -rotate-90">
-              {/* 배경 트랙 */}
-              <circle cx={70} cy={70} r={RADIUS} fill="none" stroke="#F5F5F7" strokeWidth={10} />
-              {/* 진행 게이지 — 1초 쫀득한 애니메이션 */}
-              <circle
-                cx={70} cy={70} r={RADIUS}
-                fill="none"
-                stroke="#0071E3"
-                strokeWidth={10}
-                strokeLinecap="round"
-                strokeDasharray={CIRCUMFERENCE}
-                strokeDashoffset={offset}
-                style={{ transition: 'stroke-dashoffset 1000ms cubic-bezier(0.32, 0.72, 0, 1)' }}
-              />
-            </svg>
-            <div className="absolute inset-0 flex flex-col items-center justify-center">
-              <span className="text-[22px] font-bold text-[#1D1D1F] leading-none tracking-[-0.04em]">{score}</span>
-              <span className="text-[11px] text-[#86868B] mt-0.5">/{target}</span>
-            </div>
-          </div>
-
-          {/* 텍스트 및 액션 영역 */}
-          <div className="flex-1">
-            <h2 className="text-[24px] font-semibold leading-[1.2] tracking-[-0.02em] text-[#1D1D1F] mb-1">
-              {visaCode} → {targetVisa}
-            </h2>
-            <p className="text-[13px] text-[#86868B] mb-4">스펙 갱신 시 점수 반영</p>
-
-            <button
-              onClick={() => setShowModal(true)}
-              onMouseDown={e => Object.assign(e.currentTarget.style, { transform: 'scale(0.96)', opacity: '0.8' })}
-              onMouseUp={e => Object.assign(e.currentTarget.style, { transform: 'scale(1)', opacity: '1' })}
-              onMouseLeave={e => Object.assign(e.currentTarget.style, { transform: 'scale(1)', opacity: '1' })}
-              className="flex items-center justify-center w-full h-[44px] rounded-[14px] bg-[#F5F5F7] text-[#0071E3] text-[15px] font-semibold tracking-[-0.022em]"
-              style={{ transition: 'all 100ms linear' }}
-            >
-              내 스펙 갱신하기
-            </button>
-          </div>
+        <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
+          <span style={{
+            fontSize: fs, fontWeight: 700, color: "#1D1D1F",
+            letterSpacing: "-0.04em", lineHeight: 1, ...SF,
+            ...(numPop ? { animation: "numPop 500ms cubic-bezier(0.34,1.56,0.64,1) forwards" } : {}),
+          }}>
+            {Math.round(displayed)}
+          </span>
+          <span style={{ fontSize: sub, color: "#86868B", marginTop: 2, ...SF }}>/ {target}</span>
         </div>
+
+        {optimistic && (
+          <div style={{
+            position: "absolute", inset: -6, borderRadius: "50%",
+            border: `2px solid ${color}`, opacity: 0.4,
+            animation: "optimisticPulse 1s ease infinite",
+          }} />
+        )}
       </div>
 
-      {/* 바텀 시트 (Z-Index 분리) */}
-      {showModal && <SpecUpdateModal onClose={() => setShowModal(false)} />}
-    </>
+      <span style={{ fontSize: 13, fontWeight: 600, color: "#86868B", letterSpacing: "-0.01em", ...SF }}>
+        {label}
+      </span>
+
+      {expiryDays !== undefined && (
+        <div style={{
+          background: expiryDays <= 14 ? "rgba(255,59,48,0.10)" : expiryDays <= 30 ? "rgba(255,149,0,0.10)" : "rgba(52,199,89,0.10)",
+          color:      expiryDays <= 14 ? "#FF3B30" : expiryDays <= 30 ? "#FF9500" : "#34C759",
+          borderRadius: 9999, padding: "3px 10px",
+          fontSize: 12, fontWeight: 700, ...SF,
+        }}>
+          D-{expiryDays}
+        </div>
+      )}
+
+      {onUpdate && (
+        <button onClick={onUpdate} style={{ background: "none", border: "none", color: "#0071E3", fontSize: 13, fontWeight: 600, cursor: "pointer", ...SF, transition: "transform 100ms linear, opacity 100ms linear" }}
+          onMouseDown={e => { e.currentTarget.style.transform = "scale(0.95)"; }}
+          onMouseUp={e => { e.currentTarget.style.transform = ""; }}>
+          스펙 갱신 →
+        </button>
+      )}
+    </div>
   );
 }
