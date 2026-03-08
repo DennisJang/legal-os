@@ -1,6 +1,7 @@
 'use client';
 import { useState, useEffect, useRef } from 'react';
 import { useDashboardStore } from '@/store/useDashboardStore';
+import { useUIStore } from '@/store/useUIStore';
 import DailyLogBottomSheet from '@/components/DailyLogBottomSheet';
 
 function useCountUp(target: number, duration = 500) {
@@ -34,6 +35,14 @@ export default function WageCalendarWidget() {
   const { markedDates, monthlyWage, wageLoading } = useDashboardStore();
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
 
+  /* ── 테마 토큰 ── */
+  const isDark     = useUIStore((s) => s.theme) === "dark";
+  const cardBg     = isDark ? "#1C1C1E" : "#FFFFFF";
+  const titleColor = isDark ? "#FFFFFF"  : "#1D1D1F";
+  const subColor   = isDark ? "#A1A1A6"  : "#86868B";
+  const dayColor   = isDark ? "#FFFFFF"  : "#1D1D1F";
+  const dotColor   = "#0071E3"; // 마킹 점 — 공통
+
   const now   = new Date();
   const year  = now.getFullYear();
   const month = now.getMonth();
@@ -45,28 +54,18 @@ export default function WageCalendarWidget() {
 
   return (
     <>
-      <div style={{
-        backgroundColor: "#FFFFFF", borderRadius: 18,
-        overflow: "hidden", padding: 20,
-        fontFamily: SF,
-      }}>
+      <div style={{ backgroundColor: cardBg, borderRadius: 18, overflow: "hidden", padding: 20, fontFamily: SF }}>
         {/* Header */}
-        <p style={{ fontSize: 13, color: "#86868B", marginBottom: 4, letterSpacing: "-0.01em" }}>
+        <p style={{ fontSize: 13, color: subColor, marginBottom: 4, letterSpacing: "-0.01em" }}>
           {year}년 {month + 1}월 합법 예상 급여
         </p>
         <div style={{ height: 40, marginBottom: 16, display: "flex", alignItems: "center" }}>
           {wageLoading ? (
-            <span style={{
-              fontSize: 24, fontWeight: 700, letterSpacing: "-0.04em",
-              color: "#86868B", opacity: 0.5,
-            }}>
+            <span style={{ fontSize: 24, fontWeight: 700, letterSpacing: "-0.04em", color: subColor, opacity: 0.5 }}>
               계산 중...
             </span>
           ) : (
-            <p style={{
-              fontSize: 34, fontWeight: 700, letterSpacing: "-0.04em",
-              color: "#1D1D1F", lineHeight: 1.1, margin: 0,
-            }}>
+            <p style={{ fontSize: 34, fontWeight: 700, letterSpacing: "-0.04em", color: titleColor, lineHeight: 1.1, margin: 0 }}>
               ₩{displayWage.toLocaleString()}
             </p>
           )}
@@ -77,7 +76,7 @@ export default function WageCalendarWidget() {
           {DAYS_KR.map((d, i) => (
             <p key={d} style={{
               textAlign: "center", fontSize: 11, fontWeight: 600,
-              color: i === 0 ? "#FF3B30" : i === 6 ? "#0071E3" : "#86868B",
+              color: i === 0 ? "#FF3B30" : i === 6 ? "#0071E3" : subColor,
               padding: "4px 0", margin: 0,
             }}>
               {d}
@@ -108,14 +107,14 @@ export default function WageCalendarWidget() {
               >
                 <span style={{
                   fontSize: 15, fontWeight: isToday ? 700 : 400, lineHeight: 1,
-                  color: isToday ? "#FFFFFF" : "#1D1D1F",
+                  color: isToday ? "#FFFFFF" : dayColor,
                 }}>
                   {day}
                 </span>
                 {isMarked && (
                   <span style={{
                     marginTop: 3, width: 4, height: 4, borderRadius: "50%",
-                    background: isToday ? "#FFFFFF" : "#0071E3",
+                    background: isToday ? "#FFFFFF" : dotColor,
                     display: "block",
                   }} />
                 )}

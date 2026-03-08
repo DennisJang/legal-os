@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useState, useRef } from "react";
+import { useUIStore } from "@/store/useUIStore";
 
 const ACTIONS = [
   { icon: "🛂", label: "내 비자 점수 갱신", href: "/dashboard" },
@@ -16,6 +17,18 @@ export default function MagicPalette() {
   const [query,   setQuery]   = useState("");
   const [visible, setVisible] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
+
+  /* ── 테마 토큰 ── */
+  const isDark       = useUIStore((s) => s.theme) === "dark";
+  const sheetBg      = isDark ? "rgba(28,28,30,0.94)"    : "rgba(255,255,255,0.72)";
+  const handleBg     = isDark ? "rgba(255,255,255,0.12)" : "#E5E5EA";
+  const inputBg      = isDark ? "#2C2C2E"                 : "#F5F5F7";
+  const inputColor   = isDark ? "#FFFFFF"                 : "#1D1D1F";
+  const itemColor    = isDark ? "#FFFFFF"                 : "#1D1D1F";
+  const itemHoverBg  = isDark ? "#2C2C2E"                 : "#F5F5F7";
+  const iconBg       = isDark ? "#2C2C2E"                 : "#F5F5F7";
+  const chevronColor = isDark ? "#636366"                 : "#C7C7CC";
+  const footerColor  = isDark ? "#636366"                 : "#86868B";
 
   useEffect(() => {
     const h = (e: KeyboardEvent) => {
@@ -71,7 +84,7 @@ export default function MagicPalette() {
             onClick={e => e.stopPropagation()}
             style={{
               width: "100%", maxWidth: 430,
-              background: "rgba(255,255,255,0.72)",
+              background: sheetBg,
               backdropFilter: "blur(20px) saturate(180%)",
               WebkitBackdropFilter: "blur(20px) saturate(180%)",
               borderRadius: "24px 24px 0 0",
@@ -83,7 +96,7 @@ export default function MagicPalette() {
           >
             {/* Handle */}
             <div style={{ display: "flex", justifyContent: "center", padding: "12px 0 8px" }}>
-              <div style={{ width: 36, height: 4, borderRadius: 2, backgroundColor: "#E5E5EA" }} />
+              <div style={{ width: 36, height: 4, borderRadius: 2, backgroundColor: handleBg }} />
             </div>
 
             {/* Input */}
@@ -94,27 +107,27 @@ export default function MagicPalette() {
                 placeholder="검색하거나 명령어를 입력하세요..."
                 style={{
                   width: "100%", padding: "14px 16px", borderRadius: 14,
-                  border: "none", backgroundColor: "#F5F5F7",
-                  fontSize: 17, color: "#1D1D1F", outline: "none",
+                  border: "none", backgroundColor: inputBg,
+                  fontSize: 17, color: inputColor, outline: "none",
                   letterSpacing: "-0.022em", fontFamily: SF,
                   boxSizing: "border-box",
                 }}
               />
             </div>
 
-            {/* List — <a> 완전 제거, <button> + router.push 패턴 */}
+            {/* List */}
             <ul style={{ listStyle: "none", margin: 0, padding: "4px 0" }}>
               {filtered.map(a => (
                 <li key={a.label}>
                   <button
                     onClick={() => { setOpen(false); window.location.href = a.href; }}
-                    onMouseDown={(e: React.MouseEvent<HTMLButtonElement>) => { e.currentTarget.style.background = "#F5F5F7"; e.currentTarget.style.transform = "scale(0.98)"; }}
+                    onMouseDown={(e: React.MouseEvent<HTMLButtonElement>) => { e.currentTarget.style.background = itemHoverBg; e.currentTarget.style.transform = "scale(0.98)"; }}
                     onMouseUp={(e: React.MouseEvent<HTMLButtonElement>) =>    { e.currentTarget.style.background = "transparent"; e.currentTarget.style.transform = "scale(1)"; }}
                     onMouseLeave={(e: React.MouseEvent<HTMLButtonElement>) => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.transform = "scale(1)"; }}
                     style={{
                       display: "flex", alignItems: "center", gap: 16, width: "100%",
                       padding: "14px 20px", border: "none", background: "transparent",
-                      color: "#1D1D1F", fontSize: 17, letterSpacing: "-0.022em",
+                      color: itemColor, fontSize: 17, letterSpacing: "-0.022em",
                       fontFamily: SF, cursor: "pointer",
                       transition: "transform 100ms linear, background 100ms linear",
                       borderRadius: 12, margin: "0 8px", boxSizing: "border-box",
@@ -122,20 +135,20 @@ export default function MagicPalette() {
                   >
                     <span style={{
                       width: 40, height: 40, borderRadius: 10, flexShrink: 0,
-                      background: "#F5F5F7",
+                      background: iconBg,
                       display: "flex", alignItems: "center", justifyContent: "center",
                       fontSize: 20,
                     }}>
                       {a.icon}
                     </span>
                     <span style={{ fontWeight: 500 }}>{a.label}</span>
-                    <span style={{ marginLeft: "auto", color: "#C7C7CC", fontSize: 18 }}>›</span>
+                    <span style={{ marginLeft: "auto", color: chevronColor, fontSize: 18 }}>›</span>
                   </button>
                 </li>
               ))}
             </ul>
 
-            <p style={{ textAlign: "center", fontSize: 13, color: "#86868B", margin: "12px 0 0", fontFamily: SF }}>
+            <p style={{ textAlign: "center", fontSize: 13, color: footerColor, margin: "12px 0 0", fontFamily: SF }}>
               ESC 닫기 · ⌘K 토글
             </p>
           </div>

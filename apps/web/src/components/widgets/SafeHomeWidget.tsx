@@ -1,5 +1,6 @@
 "use client";
 import { useRouter } from "next/navigation";
+import { useUIStore } from "@/store/useUIStore";
 
 const STATUS_MAP = {
   SAFE:    { label: "안전", pill: "#34C759", text: "#fff" },
@@ -12,12 +13,18 @@ export default function SafeHomeWidget() {
   const router = useRouter();
   const { label, pill, text } = STATUS_MAP["SAFE"];
 
+  /* ── 테마 토큰 ── */
+  const isDark     = useUIStore((s) => s.theme) === "dark";
+  const cardBg     = isDark ? "#1C1C1E" : "#FFFFFF";
+  const titleColor = isDark ? "#FFFFFF"  : "#1D1D1F";
+  const subColor   = isDark ? "#A1A1A6"  : "#86868B";
+
   return (
-    <div style={{ backgroundColor: "#FFFFFF", borderRadius: 18, overflow: "hidden", padding: 20, fontFamily: SF }}>
+    <div style={{ backgroundColor: cardBg, borderRadius: 18, overflow: "hidden", padding: 20, fontFamily: SF }}>
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 20 }}>
         <div>
-          <p style={{ fontSize: 17, fontWeight: 700, color: "#1D1D1F", margin: 0, letterSpacing: "-0.022em" }}>Safe-Home 스캐너</p>
-          <p style={{ fontSize: 13, color: "#86868B", margin: "3px 0 0" }}>계약서 AI 분석</p>
+          <p style={{ fontSize: 17, fontWeight: 700, color: titleColor, margin: 0, letterSpacing: "-0.022em" }}>Safe-Home 스캐너</p>
+          <p style={{ fontSize: 13, color: subColor, margin: "3px 0 0" }}>계약서 AI 분석</p>
         </div>
         <span style={{ fontSize: 13, fontWeight: 600, padding: "5px 12px", borderRadius: 9999, backgroundColor: pill, color: text }}>{label}</span>
       </div>
@@ -29,7 +36,7 @@ export default function SafeHomeWidget() {
           </svg>
         </div>
       </div>
-      <p style={{ fontSize: 13, color: "#86868B", textAlign: "center", margin: "0 0 20px" }}>계약서 AI 분석 완료</p>
+      <p style={{ fontSize: 13, color: subColor, textAlign: "center", margin: "0 0 20px" }}>계약서 AI 분석 완료</p>
       <button
         onClick={() => router.push("/dashboard/safehome")}
         onMouseDown={e => { e.currentTarget.style.transform = "scale(0.96)"; e.currentTarget.style.opacity = "0.8"; }}

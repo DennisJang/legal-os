@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { useUIStore } from "@/store/useUIStore";
 
 interface VisaRingWidgetProps {
   score:       number;
@@ -36,6 +37,13 @@ export default function VisaRingWidget({
   const cx = outer / 2;
   const cy = outer / 2;
 
+  /* ── 테마 토큰 ── */
+  const isDark = useUIStore((s) => s.theme) === "dark";
+  const trackColor  = isDark ? "#2C2C2E" : "#E5E5EA";
+  const scoreColor  = isDark ? "#FFFFFF"  : "#1D1D1F";
+  const labelColor  = isDark ? "#A1A1A6"  : "#86868B";
+  const updateColor = "#0071E3"; // Apple Blue — 라이트/다크 공통
+
   const [displayed, setDisplayed] = useState(0);
   const [numPop,    setNumPop]    = useState(false);
   const prev = useRef(score);
@@ -59,7 +67,7 @@ export default function VisaRingWidget({
     <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 8 }}>
       <div style={{ position: "relative", width: outer, height: outer }}>
         <svg width={outer} height={outer} style={{ transform: "rotate(-90deg)", overflow: "visible" }}>
-          <circle cx={cx} cy={cy} r={r} fill="none" stroke="#E5E5EA" strokeWidth={sw} />
+          <circle cx={cx} cy={cy} r={r} fill="none" stroke={trackColor} strokeWidth={sw} />
           <circle
             cx={cx} cy={cy} r={r} fill="none"
             stroke={color} strokeWidth={sw} strokeLinecap="round"
@@ -70,13 +78,13 @@ export default function VisaRingWidget({
 
         <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
           <span style={{
-            fontSize: fs, fontWeight: 700, color: "#1D1D1F",
+            fontSize: fs, fontWeight: 700, color: scoreColor,
             letterSpacing: "-0.04em", lineHeight: 1, ...SF,
             ...(numPop ? { animation: "numPop 500ms cubic-bezier(0.34,1.56,0.64,1) forwards" } : {}),
           }}>
             {Math.round(displayed)}
           </span>
-          <span style={{ fontSize: sub, color: "#86868B", marginTop: 2, ...SF }}>/ {target}</span>
+          <span style={{ fontSize: sub, color: labelColor, marginTop: 2, ...SF }}>/ {target}</span>
         </div>
 
         {optimistic && (
@@ -88,7 +96,7 @@ export default function VisaRingWidget({
         )}
       </div>
 
-      <span style={{ fontSize: 13, fontWeight: 600, color: "#86868B", letterSpacing: "-0.01em", ...SF }}>
+      <span style={{ fontSize: 13, fontWeight: 600, color: labelColor, letterSpacing: "-0.01em", ...SF }}>
         {label}
       </span>
 
@@ -104,9 +112,12 @@ export default function VisaRingWidget({
       )}
 
       {onUpdate && (
-        <button onClick={onUpdate} style={{ background: "none", border: "none", color: "#0071E3", fontSize: 13, fontWeight: 600, cursor: "pointer", ...SF, transition: "transform 100ms linear, opacity 100ms linear" }}
+        <button
+          onClick={onUpdate}
+          style={{ background: "none", border: "none", color: updateColor, fontSize: 13, fontWeight: 600, cursor: "pointer", ...SF, transition: "transform 100ms linear, opacity 100ms linear" }}
           onMouseDown={e => { e.currentTarget.style.transform = "scale(0.95)"; }}
-          onMouseUp={e => { e.currentTarget.style.transform = ""; }}>
+          onMouseUp={e   => { e.currentTarget.style.transform = ""; }}
+        >
           스펙 갱신 →
         </button>
       )}

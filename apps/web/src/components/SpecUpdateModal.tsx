@@ -2,18 +2,11 @@
 import { useState } from 'react';
 import { createBrowserClient } from '@supabase/ssr';
 import { useDashboardStore } from '@/store/useDashboardStore';
+import { useUIStore } from '@/store/useUIStore';
 
 interface Props { onClose: () => void; }
 
 const SF = `-apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", sans-serif`;
-
-const inputStyle: React.CSSProperties = {
-  width: "100%", height: 52, borderRadius: 14, border: "none",
-  backgroundColor: "#F5F5F7", padding: "0 16px",
-  fontSize: 17, color: "#1D1D1F", outline: "none",
-  letterSpacing: "-0.022em", fontFamily: SF,
-  boxSizing: "border-box",
-};
 
 export default function SpecUpdateModal({ onClose }: Props) {
   const { user, updateSpecOptimistic } = useDashboardStore();
@@ -21,6 +14,15 @@ export default function SpecUpdateModal({ onClose }: Props) {
   const [income, setIncome] = useState(user?.current_annual_income ?? 0);
   const [topik,  setTopik]  = useState(user?.topik_level ?? 0);
   const [saving, setSaving] = useState(false);
+
+  /* ── 테마 토큰 ── */
+  const isDark      = useUIStore((s) => s.theme) === "dark";
+  const sheetBg     = isDark ? "rgba(28,28,30,0.96)"    : "rgba(255,255,255,0.92)";
+  const handleBg    = isDark ? "rgba(255,255,255,0.12)" : "#E5E5EA";
+  const titleColor  = isDark ? "#FFFFFF"                 : "#1D1D1F";
+  const labelColor  = isDark ? "#A1A1A6"                 : "#86868B";
+  const inputBg     = isDark ? "#2C2C2E"                 : "#F5F5F7";
+  const inputColor  = isDark ? "#FFFFFF"                 : "#1D1D1F";
 
   const supabase = createBrowserClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -32,6 +34,20 @@ export default function SpecUpdateModal({ onClose }: Props) {
     await updateSpecOptimistic({ current_annual_income: income, topik_level: topik }, supabase);
     setSaving(false);
     onClose();
+  };
+
+  const inputStyle: React.CSSProperties = {
+    width: "100%", height: 52, borderRadius: 14, border: "none",
+    backgroundColor: inputBg, padding: "0 16px",
+    fontSize: 17, color: inputColor, outline: "none",
+    letterSpacing: "-0.022em", fontFamily: SF,
+    boxSizing: "border-box",
+  };
+
+  const labelStyle: React.CSSProperties = {
+    fontSize: 13, color: labelColor, display: "block",
+    marginBottom: 6, fontWeight: 600, letterSpacing: "-0.01em",
+    fontFamily: SF,
   };
 
   return (
@@ -51,7 +67,7 @@ export default function SpecUpdateModal({ onClose }: Props) {
         style={{
           width: "100%", maxWidth: 430,
           borderRadius: "28px 28px 0 0", overflow: "hidden",
-          background: "rgba(255,255,255,0.92)",
+          background: sheetBg,
           backdropFilter: "blur(20px) saturate(180%)",
           WebkitBackdropFilter: "blur(20px) saturate(180%)",
           paddingBottom: "max(env(safe-area-inset-bottom), 40px)",
@@ -61,31 +77,20 @@ export default function SpecUpdateModal({ onClose }: Props) {
         }}
       >
         {/* Handle */}
-        <div style={{
-          width: 40, height: 4, borderRadius: 2,
-          backgroundColor: "#E5E5EA", margin: "0 auto 24px",
-        }} />
+        <div style={{ width: 40, height: 4, borderRadius: 2, backgroundColor: handleBg, margin: "0 auto 24px" }} />
 
-        <h2 style={{
-          fontSize: 24, fontWeight: 700, letterSpacing: "-0.02em",
-          color: "#1D1D1F", marginBottom: 24,
-        }}>
+        <h2 style={{ fontSize: 24, fontWeight: 700, letterSpacing: "-0.02em", color: titleColor, marginBottom: 24 }}>
           내 스펙 갱신하기
         </h2>
 
-        <label style={{ fontSize: 13, color: "#86868B", display: "block", marginBottom: 6, fontWeight: 600, letterSpacing: "-0.01em" }}>
-          연봉 (원)
-        </label>
+        <label style={{ ...labelStyle, marginBottom: 6 }}>연봉 (원)</label>
         <input
-          type="number"
-          value={income || ''}
+          type="number" value={income || ''}
           onChange={e => setIncome(Number(e.target.value))}
           style={{ ...inputStyle, marginBottom: 16 }}
         />
 
-        <label style={{ fontSize: 13, color: "#86868B", display: "block", marginBottom: 6, fontWeight: 600, letterSpacing: "-0.01em" }}>
-          TOPIK 레벨 (0~6)
-        </label>
+        <label style={{ ...labelStyle, marginBottom: 6 }}>TOPIK 레벨 (0~6)</label>
         <input
           type="number" min={0} max={6}
           value={topik || ''}
@@ -99,8 +104,8 @@ export default function SpecUpdateModal({ onClose }: Props) {
           disabled={saving}
           style={{
             width: "100%", height: 56, borderRadius: 14, border: "none",
-            backgroundColor: saving ? "#E5E5EA" : "#0071E3",
-            color: saving ? "#86868B" : "#FFFFFF",
+            backgroundColor: saving ? (isDark ? "#3A3A3C" : "#E5E5EA") : "#0071E3",
+            color: saving ? (isDark ? "#636366" : "#86868B") : "#FFFFFF",
             fontSize: 17, fontWeight: 600, letterSpacing: "-0.022em",
             cursor: saving ? "not-allowed" : "pointer",
             boxShadow: "none",
