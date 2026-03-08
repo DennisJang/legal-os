@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef } from "react";
+import { useEffect, useRef } from "react";
 import { useDashboardStore } from "@/store/useDashboardStore";
 
 type UserData = {
@@ -20,12 +20,14 @@ type Props = {
 };
 
 export default function HydrationProvider({ initialUser, children }: Props) {
-  const isInitialized = useRef(false);
+  const hydrated = useRef(false);
 
-  if (!isInitialized.current && initialUser) {
+  useEffect(() => {
+    if (hydrated.current) return;
+    if (!initialUser) return;
     useDashboardStore.getState().hydrate(initialUser);
-    isInitialized.current = true;
-  }
+    hydrated.current = true;
+  }, [initialUser]);
 
   return <>{children}</>;
 }

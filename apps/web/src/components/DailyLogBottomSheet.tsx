@@ -10,10 +10,11 @@ interface Props {
 
 export default function DailyLogBottomSheet({ date, onClose }: Props) {
   const { saveWorkLog } = useDashboardStore();
-  const [clockIn,  setClockIn]  = useState('09:00');
-  const [clockOut, setClockOut] = useState('18:00');
-  const [breakMin, setBreakMin] = useState('60');
-  const [saving,   setSaving]   = useState(false);
+  const [clockIn,    setClockIn]    = useState('09:00');
+  const [clockOut,   setClockOut]   = useState('18:00');
+  const [breakMin,   setBreakMin]   = useState('60');
+  const [hourlyWage, setHourlyWage] = useState('9860'); // ✅ 시급 (기본: 최저시급)
+  const [saving,     setSaving]     = useState(false);
 
   const supabase = createBrowserClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -30,6 +31,7 @@ export default function DailyLogBottomSheet({ date, onClose }: Props) {
       clock_in:      inDate.toISOString(),
       clock_out:     outDate.toISOString(),
       break_minutes: Number(breakMin) || 0,
+      hourly_wage:   Number(hourlyWage) || 9860, // ✅ 전달
     }, supabase);
     setSaving(false);
     onClose();
@@ -38,12 +40,10 @@ export default function DailyLogBottomSheet({ date, onClose }: Props) {
   const inputStyle: React.CSSProperties = {
     width: "100%", height: 52, borderRadius: 14,
     backgroundColor: "#F5F5F7", border: "none",
-    padding: "0 16px",
-    fontSize: 17, color: "#1D1D1F", outline: "none",
+    padding: "0 16px", fontSize: 17, color: "#1D1D1F", outline: "none",
     letterSpacing: "-0.022em",
     fontFamily: `-apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif`,
-    boxSizing: "border-box",
-    transition: "border 200ms ease",
+    boxSizing: "border-box", transition: "border 200ms ease",
   };
 
   const labelStyle: React.CSSProperties = {
@@ -105,13 +105,25 @@ export default function DailyLogBottomSheet({ date, onClose }: Props) {
           </div>
         </div>
 
-        {/* 휴게시간 */}
-        <label style={labelStyle}>휴게 시간 (분)</label>
-        <input
-          type="number" value={breakMin} onChange={e => setBreakMin(e.target.value)}
-          placeholder="예: 60 (점심시간 등)"
-          style={{ ...inputStyle, marginBottom: 32 }}
-        />
+        {/* 휴게시간 + 시급 row */}
+        <div style={{ display: "flex", gap: 12, marginBottom: 32 }}>
+          <div style={{ flex: 1 }}>
+            <label style={labelStyle}>휴게 시간 (분)</label>
+            <input
+              type="number" value={breakMin} onChange={e => setBreakMin(e.target.value)}
+              placeholder="60"
+              style={inputStyle}
+            />
+          </div>
+          <div style={{ flex: 1 }}>
+            <label style={labelStyle}>시급 (원)</label>
+            <input
+              type="number" value={hourlyWage} onChange={e => setHourlyWage(e.target.value)}
+              placeholder="9860"
+              style={inputStyle}
+            />
+          </div>
+        </div>
 
         {/* CTA */}
         <button

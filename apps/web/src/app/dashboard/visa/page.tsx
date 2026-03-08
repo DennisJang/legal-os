@@ -1,28 +1,17 @@
-// apps/web/src/app/dashboard/visa/page.tsx
 "use client";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { useDashboardStore } from "@/store/useDashboardStore";
-import VisaRingWidget from "@/components/widgets/VisaRingWidget";
+import VisaRingWidget  from "@/components/widgets/VisaRingWidget";
 import SpecUpdateModal from "@/components/SpecUpdateModal";
 import LiabilityActionSheet from "@/components/LiabilityActionSheet";
 
 const T = {
-  bg:        "#F5F5F7",
-  surface:   "#FFFFFF",
-  primary:   "#1D1D1F",
-  secondary: "#86868B",
-  blue:      "#0071E3",
-  green:     "#34C759",
-  amber:     "#FF9500",
-  red:       "#FF3B30",
-  font:      `-apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", sans-serif`,
+  bg: "#F5F5F7", surface: "#FFFFFF", primary: "#1D1D1F",
+  secondary: "#86868B", blue: "#0071E3", green: "#34C759",
+  amber: "#FF9500", red: "#FF3B30",
+  font: `-apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", sans-serif`,
 };
-
-const REQUIREMENTS = [
-  { key: "income",    label: "소득 기준",   unit: "만원",  target: 8000 },
-  { key: "topik",     label: "TOPIK",       unit: "급",    target: 6    },
-  { key: "education", label: "학력",        unit: "",      target: 1    },
-];
 
 const css = `
   @keyframes numPop {
@@ -43,17 +32,18 @@ const css = `
 `;
 
 export default function VisaPage() {
+  const router = useRouter();
   const { user } = useDashboardStore();
   const [showSpec,       setShowSpec]       = useState(false);
   const [showDisclaimer, setShowDisclaimer] = useState(false);
   const [optimistic,     setOptimistic]     = useState(false);
 
-  const score      = user?.current_score  ?? 0;
-  const target     = user?.target_score   ?? 100;
-  const income     = (user as any)?.current_annual_income ?? 0;
-  const topik      = (user as any)?.topik_level           ?? 0;
-  const fromVisa   = user?.current_visa_code ?? "E-9";
-  const toVisa     = user?.target_visa_code  ?? "E-7-4";
+  const score    = user?.current_score  ?? 0;
+  const target   = user?.target_score   ?? 100;
+  const income   = (user as any)?.current_annual_income ?? 0;
+  const topik    = (user as any)?.topik_level           ?? 0;
+  const fromVisa = user?.current_visa_code ?? "E-9";
+  const toVisa   = user?.target_visa_code  ?? "E-7-4";
   const expiryDays = 87; // TODO: visa_trackers.expiration_date 연산
 
   const pct   = Math.min(score / target, 1);
@@ -110,12 +100,8 @@ export default function VisaPage() {
         }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 24 }}>
             <div>
-              <h2 style={{ fontSize: 17, fontWeight: 700, color: T.primary, letterSpacing: "-0.022em" }}>
-                종합 점수
-              </h2>
-              <p style={{ fontSize: 13, color: T.secondary, marginTop: 2 }}>
-                합격 커트라인 {target}점
-              </p>
+              <h2 style={{ fontSize: 17, fontWeight: 700, color: T.primary, letterSpacing: "-0.022em" }}>종합 점수</h2>
+              <p style={{ fontSize: 13, color: T.secondary, marginTop: 2 }}>합격 커트라인 {target}점</p>
             </div>
             {optimistic && (
               <div style={{
@@ -127,21 +113,10 @@ export default function VisaPage() {
               </div>
             )}
           </div>
-
-          {/* 링 3개 */}
           <div style={{ display: "flex", justifyContent: "space-around", alignItems: "flex-start" }}>
-            <VisaRingWidget
-              score={score} target={target} label="종합 점수"
-              size="lg" optimistic={optimistic} expiryDays={expiryDays}
-            />
-            <VisaRingWidget
-              score={topik} target={6} label="TOPIK"
-              size="md"
-            />
-            <VisaRingWidget
-              score={Math.round(income / 8000 * 100)} target={100} label="소득 점수"
-              size="md"
-            />
+            <VisaRingWidget score={score}  target={target} label="종합 점수" size="lg" optimistic={optimistic} expiryDays={expiryDays} />
+            <VisaRingWidget score={topik}  target={6}      label="TOPIK"     size="md" />
+            <VisaRingWidget score={Math.round(income / 8000 * 100)} target={100} label="소득 점수" size="md" />
           </div>
         </div>
 
@@ -177,38 +152,29 @@ export default function VisaPage() {
           animation: "fadeSlideUp 380ms 120ms cubic-bezier(0.32,0.72,0,1) both",
         }}>
           <div style={{ padding: "16px 20px 8px" }}>
-            <h2 style={{ fontSize: 17, fontWeight: 700, color: T.primary, letterSpacing: "-0.022em" }}>
-              요건 달성 현황
-            </h2>
+            <h2 style={{ fontSize: 17, fontWeight: 700, color: T.primary, letterSpacing: "-0.022em" }}>요건 달성 현황</h2>
           </div>
 
           {[
-            { label: "소득 기준",  value: `${(income / 100).toFixed(0)}백만원`,  pct: Math.min(income / 8000, 1), met: income >= 2400 },
+            { label: "소득 기준",  value: `${(income / 100).toFixed(0)}백만원`, pct: Math.min(income / 8000, 1), met: income >= 2400 },
             { label: "TOPIK 급수", value: `${topik}급`,                          pct: topik / 6,                  met: topik >= 4    },
             { label: "체류 기간",  value: "3년 이상",                             pct: 1,                          met: true          },
           ].map((item, i) => (
             <div key={item.label}>
               {i > 0 && <div style={{ height: 0.5, background: "#F2F2F7", marginLeft: 20 }} />}
               <div style={{ padding: "14px 20px", display: "flex", alignItems: "center", gap: 14 }}>
-                {/* 달성 여부 아이콘 */}
                 <div style={{
                   width: 32, height: 32, borderRadius: "50%", flexShrink: 0,
                   background: item.met ? `${T.green}15` : `${T.red}12`,
-                  display: "flex", alignItems: "center", justifyContent: "center",
-                  fontSize: 16,
+                  display: "flex", alignItems: "center", justifyContent: "center", fontSize: 16,
                 }}>
                   {item.met ? "✓" : "✕"}
                 </div>
                 <div style={{ flex: 1 }}>
                   <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 6 }}>
-                    <span style={{ fontSize: 14, fontWeight: 600, color: T.primary, letterSpacing: "-0.022em" }}>
-                      {item.label}
-                    </span>
-                    <span style={{ fontSize: 14, fontWeight: 700, color: item.met ? T.green : T.secondary }}>
-                      {item.value}
-                    </span>
+                    <span style={{ fontSize: 14, fontWeight: 600, color: T.primary, letterSpacing: "-0.022em" }}>{item.label}</span>
+                    <span style={{ fontSize: 14, fontWeight: 700, color: item.met ? T.green : T.secondary }}>{item.value}</span>
                   </div>
-                  {/* 진행 게이지 */}
                   <div style={{ height: 4, borderRadius: 2, background: "#E5E5EA", overflow: "hidden" }}>
                     <div style={{
                       height: "100%", borderRadius: 2,
@@ -229,9 +195,7 @@ export default function VisaPage() {
           borderLeft: `3px solid ${T.blue}`,
           animation: "fadeSlideUp 380ms 180ms cubic-bezier(0.32,0.72,0,1) both",
         }}>
-          <p style={{ fontSize: 13, fontWeight: 700, color: T.blue, marginBottom: 6 }}>
-            💡 다음 액션
-          </p>
+          <p style={{ fontSize: 13, fontWeight: 700, color: T.blue, marginBottom: 6 }}>💡 다음 액션</p>
           <p style={{ fontSize: 14, color: T.primary, lineHeight: 1.6, letterSpacing: "-0.01em" }}>
             {topik < 4
               ? "TOPIK 4급 이상 취득 시 비자 전환 요건을 충족합니다."
@@ -248,16 +212,15 @@ export default function VisaPage() {
       )}
 
       {/* 면책 동의 — 로직 동결 */}
-      {showDisclaimer && (
-        <LiabilityActionSheet
-          isOpen={showDisclaimer}
-          onClose={() => setShowDisclaimer(false)}
-          onConfirm={() => {
-            setShowDisclaimer(false);
-            window.location.href = "/fax";
-          }}
-        />
-      )}
+      <LiabilityActionSheet
+        isOpen={showDisclaimer}
+        onClose={() => setShowDisclaimer(false)}
+        onConfirm={() => {
+          setShowDisclaimer(false);
+          // ✅ 패치: window.location.href → router.push()
+          router.push("/dashboard/fax?type=arc_renewal");
+        }}
+      />
     </main>
   );
 }

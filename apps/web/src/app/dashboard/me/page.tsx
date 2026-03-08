@@ -1,5 +1,7 @@
 "use client";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { createBrowserClient } from "@supabase/ssr";
 import { useDashboardStore } from "@/store/useDashboardStore";
 import { usePaymentStore } from "@/store/usePaymentStore";
 import SpecUpdateModal from "@/components/SpecUpdateModal";
@@ -34,7 +36,7 @@ const Row = ({ label, value, action, onPress }: {
   >
     <span style={{ fontSize: 15, color: T.primary, letterSpacing: "-0.022em" }}>{label}</span>
     <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-      {value && <span style={{ fontSize: 15, color: T.secondary }}>{value}</span>}
+      {value  && <span style={{ fontSize: 15, color: T.secondary }}>{value}</span>}
       {action && <span style={{ fontSize: 15, color: T.blue, fontWeight: 600 }}>{action}</span>}
       {onPress && <span style={{ color: "#C7C7CC", fontSize: 18 }}>›</span>}
     </div>
@@ -44,13 +46,25 @@ const Row = ({ label, value, action, onPress }: {
 const Divider = () => <div style={{ height: 0.5, background: "#F2F2F7", marginLeft: 20 }} />;
 
 export default function MePage() {
-  const { user } = useDashboardStore();
+  const router = useRouter();
+  const { user, reset } = useDashboardStore();
   const { status, planType, resetSubscription } = usePaymentStore();
   const [showSpec, setShowSpec] = useState(false);
 
   const isPremium   = planType === "PREMIUM_LEGAL" || status === "ACTIVE";
   const statusColor = status === "ACTIVE" ? T.green : status === "PAST_DUE" ? T.red : T.secondary;
   const statusLabel = status === "ACTIVE" ? "구독 중" : status === "PAST_DUE" ? "결제 실패" : status === "CANCELED" ? "해지됨" : "미구독";
+
+  // ✅ 패치: supabase.auth.signOut() 경유 (window.location.href 금지)
+  const handleSignOut = async () => {
+    const supabase = createBrowserClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+    );
+    await supabase.auth.signOut();
+    reset();
+    router.push("/");
+  };
 
   return (
     <main style={{ background: T.bg, minHeight: "100vh", paddingBottom: 100, fontFamily: T.font }}>
@@ -83,8 +97,7 @@ export default function MePage() {
           <div style={{
             width: 64, height: 64, borderRadius: "50%", flexShrink: 0,
             background: `${T.blue}15`,
-            display: "flex", alignItems: "center", justifyContent: "center",
-            fontSize: 28,
+            display: "flex", alignItems: "center", justifyContent: "center", fontSize: 28,
           }}>
             👤
           </div>
@@ -92,9 +105,7 @@ export default function MePage() {
             <p style={{ fontSize: 20, fontWeight: 700, color: T.primary, letterSpacing: "-0.03em" }}>
               {user?.full_name ?? "이름 미설정"}
             </p>
-            <p style={{ fontSize: 13, color: T.secondary, marginTop: 2 }}>
-              {user?.email ?? ""}
-            </p>
+            <p style={{ fontSize: 13, color: T.secondary, marginTop: 2 }}>{user?.email ?? ""}</p>
             <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 6 }}>
               <div style={{ width: 6, height: 6, borderRadius: "50%", background: statusColor }} />
               <span style={{ fontSize: 12, fontWeight: 600, color: statusColor }}>
@@ -124,15 +135,15 @@ export default function MePage() {
             <h2 style={{ fontSize: 17, fontWeight: 700, color: T.primary, letterSpacing: "-0.022em" }}>내 스펙</h2>
           </div>
           <Divider />
-          <Row label="국적"       value={user?.nationality        ?? "미설정"} />
+          <Row label="국적"      value={user?.nationality       ?? "미설정"} />
           <Divider />
-          <Row label="현재 비자"  value={user?.current_visa_code  ?? "미설정"} />
+          <Row label="현재 비자" value={user?.current_visa_code ?? "미설정"} />
           <Divider />
-          <Row label="목표 비자"  value={user?.target_visa_code   ?? "미설정"} />
+          <Row label="목표 비자" value={user?.target_visa_code  ?? "미설정"} />
           <Divider />
-          <Row label="TOPIK"      value={`${(user as any)?.topik_level ?? 0}급`} />
+          <Row label="TOPIK"     value={`${(user as any)?.topik_level ?? 0}급`} />
           <Divider />
-          <Row label="연 소득"    value={`₩${((user as any)?.current_annual_income ?? 0).toLocaleString()}`} />
+          <Row label="연 소득"   value={`₩${((user as any)?.current_annual_income ?? 0).toLocaleString()}`} />
           <Divider />
           <Row label="스펙 갱신" action="수정 →" onPress={() => setShowSpec(true)} />
         </div>
@@ -146,25 +157,22 @@ export default function MePage() {
             <h2 style={{ fontSize: 17, fontWeight: 700, color: T.primary, letterSpacing: "-0.022em" }}>구독</h2>
           </div>
           <Divider />
-          <Row label="플랜"   value={isPremium ? "Premium Legal" : "Basic"} />
+          <Row label="플랜"      value={isPremium ? "Premium Legal" : "Basic"} />
           <Divider />
-          <Row label="상태"   value={statusLabel} />
+          <Row label="상태"      value={statusLabel} />
           <Divider />
           <Row label="월 구독료" value="₩4,900" />
           {!isPremium && (
             <>
               <Divider />
-              <Row label="업그레이드" action="구독하기 →" onPress={() => window.location.href = "/billing"} />
+              {/* ✅ 패치: window.location.href → router.push() */}
+              <Row label="업그레이드" action="구독하기 →" onPress={() => router.push("/billing")} />
             </>
           )}
           {isPremium && status === "ACTIVE" && (
             <>
               <Divider />
-              <Row
-                label="구독 해지"
-                action="해지 →"
-                onPress={resetSubscription}
-              />
+              <Row label="구독 해지" action="해지 →" onPress={resetSubscription} />
             </>
           )}
         </div>
@@ -176,7 +184,7 @@ export default function MePage() {
         }}>
           <button
             className="press"
-            onClick={() => window.location.href = "/"}
+            onClick={handleSignOut}
             style={{
               display: "flex", alignItems: "center", justifyContent: "center",
               width: "100%", padding: "16px 20px", border: "none",
