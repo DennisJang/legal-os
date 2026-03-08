@@ -7,5 +7,5 @@ export default function WelcomePage() {
   const [step, setStep] = useState<"welcome" | "theme">("welcome");
 
   if (step === "theme") return <ThemeSelector />;
-  return <WelcomeKorea onNext={() => setStep("theme")} />;
+  return <WelcomeKorea onEnter={() => setStep("theme")} />;
 }

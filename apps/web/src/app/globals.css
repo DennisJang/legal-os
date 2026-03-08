@@ -405,3 +405,94 @@ button {
   background: linear-gradient(135deg, #0071E3 0%, #5E5CE6 100%);
   border-radius: var(--radius-lg);
 }
+
+/* ═══════════════════════════════════════════════════════════════
+   15. Theme Tokens — [data-theme] 스위칭
+   기존 :root 토큰을 오버라이드. 컴포넌트 코드 수정 불필요.
+   ═══════════════════════════════════════════════════════════════ */
+
+[data-theme="light"] {
+  --bg-base:        #F5F5F7;
+  --bg-surface:     #FFFFFF;
+  --text-primary:   #1D1D1F;
+  --text-secondary: #86868B;
+  --color-blue:     #0071E3;
+  --color-green:    #34C759;
+
+  --glass-bg:     rgba(255, 255, 255, 0.72);
+  --glass-blur:   blur(20px) saturate(180%);
+  --glass-border: 0.5px solid rgba(0, 0, 0, 0.08);
+
+  /* 라이트 테마 accent */
+  --accent:         #0071E3;
+  --accent-green:   #34C759;
+}
+
+[data-theme="dark"] {
+  --bg-base:        #000000;
+  --bg-surface:     #1C1C1E;
+  --text-primary:   #FFFFFF;
+  --text-secondary: #A1A1A6;
+  --color-blue:     #0A84FF;
+  --color-green:    #30D158;
+
+  --glass-bg:     rgba(28, 28, 30, 0.80);
+  --glass-blur:   blur(20px) saturate(180%);
+  --glass-border: 0.5px solid rgba(255, 255, 255, 0.10);
+
+  /* 다크 테마 accent — Yellow */
+  --accent:         #FFD60A;
+  --accent-green:   #30D158;
+
+  /* 다크 전용 오버라이드 */
+  --shadow-modal:   0 8px 32px rgba(0, 0, 0, 0.40);
+}
+
+/* 다크 테마 body/card 전역 적용 */
+[data-theme="dark"] body,
+[data-theme="dark"] .card {
+  background-color: var(--bg-base);
+  color: var(--text-primary);
+}
+
+[data-theme="dark"] .glass-header,
+[data-theme="dark"] .glass-tabbar {
+  background: var(--glass-bg);
+  border-color: rgba(255, 255, 255, 0.10);
+}
+
+[data-theme="dark"] .daily-log-input {
+  background: var(--bg-surface);
+  color: var(--text-primary);
+  border-color: #3A3A3C;
+}
+[data-theme="dark"] .daily-log-input:focus {
+  border-color: #FFD60A;
+}
+
+[data-theme="dark"] .topik-btn {
+  background: #1C1C1E;
+  color: var(--text-secondary);
+}
+[data-theme="dark"] .topik-btn.is-active {
+  background: #FFD60A;
+  color: #000000;
+}
+
+[data-theme="dark"] .toggle-track    { background: #3A3A3C; }
+[data-theme="dark"] .sheet-handle    { background: #3A3A3C; }
+[data-theme="dark"] .list-divider    { background: rgba(255,255,255,0.08); }
+
+[data-theme="dark"] .liability-checkbox-wrap { background: #1C1C1E; }
+[data-theme="dark"] .liability-checkbox      { border-color: #48484A; }
+
+[data-theme="dark"] .magic-palette         { background: #1C1C1E; }
+[data-theme="dark"] .magic-palette-input   {
+  color: #FFFFFF;
+  border-bottom-color: rgba(255,255,255,0.08);
+}
+
+[data-theme="dark"] .btn-primary:disabled {
+  background: #2C2C2E;
+  color: #636366;
+}

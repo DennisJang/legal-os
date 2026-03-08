@@ -3,6 +3,7 @@ import { cookies } from "next/headers";
 import HydrationProvider from "@/components/HydrationProvider";
 import DashboardTabBar from "@/components/DashboardTabBar";
 import { redirect } from "next/navigation";
+import ThemeWrapper from "@/components/ThemeWrapper";
 
 async function getSessionData() {
   const cookieStore = await cookies();
@@ -18,7 +19,6 @@ async function getSessionData() {
             cookiesToSet.forEach(({ name, value, options }) =>
               cookieStore.set(name, value, {
                 ...options,
-                // ✅ Codespaces 환경 쿠키 호환성 패치
                 sameSite: "lax",
                 secure: true,
               })
@@ -29,10 +29,8 @@ async function getSessionData() {
     }
   );
 
-  // ✅ getSession 대신 getUser (보안)
   const { data: { user }, error } = await supabase.auth.getUser();
   
-  // 🔍 디버그용 — 확인 후 제거
   console.log("[layout] getUser result:", user?.id ?? "NULL", error?.message ?? "");
   
   if (!user) return null;
@@ -60,8 +58,11 @@ export default async function DashboardLayout({ children }: { children: React.Re
 
   return (
     <HydrationProvider initialUser={userData}>
-      {children}
-      <DashboardTabBar />
+      {/* ThemeWrapper: useUIStore.theme → data-theme attribute 주입 */}
+      <ThemeWrapper>
+        {children}
+        <DashboardTabBar />
+      </ThemeWrapper>
     </HydrationProvider>
   );
 }
