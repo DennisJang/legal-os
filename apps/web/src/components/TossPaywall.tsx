@@ -2,11 +2,12 @@
 import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { loadTossPayments } from "@tosspayments/tosspayments-sdk";
+import { useUIStore } from "@/store/useUIStore";
 
 /* ══════════════════════════════════════════
    LEGAL-OS Premium Paywall v2
-   순검정 + 시스템 강조색 + 오로라 CTA
-   플랜: 월간 ₩4,900 / 연간 ₩24,000
+   라이트/다크 테마 대응 — useUIStore 연동
+   ⚠️ 로직 완전 동결 — 색상 토큰만 변경
 ══════════════════════════════════════════ */
 
 const SLIDES = [
@@ -24,8 +25,74 @@ const PLANS = [
 
 type PlanId = (typeof PLANS)[number]["id"];
 
+/* ── 라이트/다크 토큰 맵 ── */
+const DARK_T = {
+  overlayBg:        "rgba(0,0,0,0.65)",
+  sheetBg:          "#0a0a0a",
+  sheetShadow:      "0 -4px 40px rgba(0,0,0,0.6)",
+  handleBg:         "rgba(255,255,255,0.12)",
+  closeBg:          "rgba(255,255,255,0.07)",
+  closeBorder:      "rgba(255,255,255,0.10)",
+  closeColor:       "rgba(255,255,255,0.5)",
+  titleColor:       "#FFFFFF",
+  subColor:         "#5a5a60",
+  dotActive:        "#FFFFFF",
+  dotInactive:      "rgba(255,255,255,0.2)",
+  planBg:           "#111",
+  planBorder:       "#1c1c1c",
+  planActiveBg:     "#161616",
+  planActiveBorder: "rgba(255,255,255,0.3)",
+  planLabel:        "rgba(255,255,255,0.8)",
+  planPrice:        "#FFFFFF",
+  planSub:          "#444",
+  planDotOff:       "#2a2a2a",
+  badgeBg:          "#FFFFFF",
+  badgeColor:       "#000000",
+  badgeBorderColor: "#0a0a0a",
+  agreeText:        "#444",
+  checkboxBorder:   "#333",
+  ctaBg:            "#FFFFFF",
+  ctaColor:         "#000000",
+  showAurora:       true,
+  footnoteColor:    "#2e2e2e",
+};
+
+const LIGHT_T = {
+  overlayBg:        "rgba(0,0,0,0.40)",
+  sheetBg:          "#FFFFFF",
+  sheetShadow:      "0 -4px 40px rgba(0,0,0,0.12)",
+  handleBg:         "rgba(0,0,0,0.10)",
+  closeBg:          "rgba(0,0,0,0.06)",
+  closeBorder:      "rgba(0,0,0,0.08)",
+  closeColor:       "rgba(0,0,0,0.4)",
+  titleColor:       "#1D1D1F",
+  subColor:         "#86868B",
+  dotActive:        "#1D1D1F",
+  dotInactive:      "rgba(0,0,0,0.15)",
+  planBg:           "#F5F5F7",
+  planBorder:       "#E5E5EA",
+  planActiveBg:     "#FFFFFF",
+  planActiveBorder: "#0071E3",
+  planLabel:        "#1D1D1F",
+  planPrice:        "#1D1D1F",
+  planSub:          "#86868B",
+  planDotOff:       "#D1D1D6",
+  badgeBg:          "#1D1D1F",
+  badgeColor:       "#FFFFFF",
+  badgeBorderColor: "#FFFFFF",
+  agreeText:        "#86868B",
+  checkboxBorder:   "#C7C7CC",
+  ctaBg:            "#0071E3",
+  ctaColor:         "#FFFFFF",
+  showAurora:       false,
+  footnoteColor:    "#86868B",
+};
+
 export default function TossPaywall({ onClose }: { onClose?: () => void }) {
   const router = useRouter();
+  const theme  = useUIStore((s) => s.theme);
+  const T      = theme === "dark" ? DARK_T : LIGHT_T;
+
   const [slide, setSlide]     = useState(0);
   const [plan, setPlan]       = useState<PlanId>("annual");
   const [agreed, setAgreed]   = useState(false);
@@ -50,7 +117,6 @@ export default function TossPaywall({ onClose }: { onClose?: () => void }) {
       const clientKey   = process.env.NEXT_PUBLIC_TOSS_CLIENT_KEY!;
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const toss = await loadTossPayments(clientKey) as any;
-      // SDK v2: payment({ customerKey }) 후 requestBillingAuth
       const payment = toss.payment({ customerKey });
       await payment.requestBillingAuth({
         method: "CARD",
@@ -65,15 +131,19 @@ export default function TossPaywall({ onClose }: { onClose?: () => void }) {
   };
 
   return (
-    <div style={S.overlay}>
+    <div style={{ ...S.overlay, background: T.overlayBg }}>
       <style>{KF}</style>
-      <div style={S.sheet}>
+      <div style={{ ...S.sheet, background: T.sheetBg, boxShadow: T.sheetShadow }}>
 
         {/* 핸들 바 */}
-        <div style={S.handle} />
+        <div style={{ ...S.handle, background: T.handleBg }} />
 
         {/* 닫기 */}
-        <button style={S.close} onClick={handleClose} aria-label="닫기">✕</button>
+        <button
+          style={{ ...S.close, background: T.closeBg, borderColor: T.closeBorder, color: T.closeColor }}
+          onClick={handleClose}
+          aria-label="닫기"
+        >✕</button>
 
         {/* 슬라이드 */}
         <div
@@ -86,8 +156,8 @@ export default function TossPaywall({ onClose }: { onClose?: () => void }) {
           }}
         >
           <div key={`v-${slide}`} style={S.visual}>{SLIDES[slide].visual}</div>
-          <p style={S.slideTitle}>{SLIDES[slide].title}</p>
-          <p style={S.slideSub}>{SLIDES[slide].sub}</p>
+          <p style={{ ...S.slideTitle, color: T.titleColor }}>{SLIDES[slide].title}</p>
+          <p style={{ ...S.slideSub, color: T.subColor }}>{SLIDES[slide].sub}</p>
         </div>
 
         {/* 인디케이터 */}
@@ -96,7 +166,7 @@ export default function TossPaywall({ onClose }: { onClose?: () => void }) {
             <button key={i} onClick={() => setSlide(i)} style={{
               ...S.dot,
               width:      i === slide ? 18 : 7,
-              background: i === slide ? "#fff" : "rgba(255,255,255,0.2)",
+              background: i === slide ? T.dotActive : T.dotInactive,
             }} />
           ))}
         </div>
@@ -106,15 +176,20 @@ export default function TossPaywall({ onClose }: { onClose?: () => void }) {
           {PLANS.map(p => (
             <button key={p.id} onClick={() => setPlan(p.id)} style={{
               ...S.planCard,
-              ...(plan === p.id ? S.planActive : {}),
+              background: plan === p.id ? T.planActiveBg  : T.planBg,
+              border:     `1.5px solid ${plan === p.id ? T.planActiveBorder : T.planBorder}`,
             }}>
-              {p.badge && <span style={S.badge}>{p.badge}</span>}
+              {p.badge && (
+                <span style={{ ...S.badge, background: T.badgeBg, color: T.badgeColor, borderColor: T.badgeBorderColor }}>
+                  {p.badge}
+                </span>
+              )}
               <div style={{ display: "flex", alignItems: "center", gap: 7 }}>
-                <span style={{ ...S.planDot, background: plan === p.id ? "#34C759" : "#2a2a2a" }} />
-                <span style={S.planLabel}>{p.label}</span>
+                <span style={{ ...S.planDot, background: plan === p.id ? "#34C759" : T.planDotOff }} />
+                <span style={{ ...S.planLabel, color: T.planLabel }}>{p.label}</span>
               </div>
-              <span style={S.planPrice}>{p.price}</span>
-              <span style={S.planSub}>{p.sub}</span>
+              <span style={{ ...S.planPrice, color: T.planPrice }}>{p.price}</span>
+              <span style={{ ...S.planSub, color: T.planSub }}>{p.sub}</span>
             </button>
           ))}
         </div>
@@ -125,28 +200,28 @@ export default function TossPaywall({ onClose }: { onClose?: () => void }) {
         {/* 약관 */}
         <label style={S.agreeRow}>
           <div
-            style={{ ...S.checkbox, background: agreed ? "#34C759" : "transparent", borderColor: agreed ? "#34C759" : "#333" }}
+            style={{ ...S.checkbox, background: agreed ? "#34C759" : "transparent", borderColor: agreed ? "#34C759" : T.checkboxBorder }}
             onClick={() => setAgreed(v => !v)}
           >
             {agreed && <span style={{ color: "#000", fontSize: 11, fontWeight: 900, lineHeight: 1 }}>✓</span>}
           </div>
-          <span style={S.agreeText}>[필수] 서비스 이용약관 및 개인정보처리방침에 동의합니다.</span>
+          <span style={{ ...S.agreeText, color: T.agreeText }}>[필수] 서비스 이용약관 및 개인정보처리방침에 동의합니다.</span>
         </label>
 
-        {/* CTA */}
+        {/* CTA — 다크: 흰버튼+오로라글로우 / 라이트: Apple Blue 솔리드 */}
         <div style={S.ctaWrap}>
-          <div style={S.aurora} />
+          {T.showAurora && <div style={S.aurora} />}
           <button
             onClick={handlePay}
             disabled={loading}
-            style={{ ...S.cta, ...(loading ? { opacity: 0.65 } : {}) }}
+            style={{ ...S.cta, background: T.ctaBg, color: T.ctaColor, ...(loading ? { opacity: 0.65 } : {}) }}
             onMouseDown={e => { (e.currentTarget as HTMLElement).style.transform = "scale(0.97)"; }}
             onMouseUp={e   => { (e.currentTarget as HTMLElement).style.transform = "scale(1)"; }}
             onMouseLeave={e => { (e.currentTarget as HTMLElement).style.transform = "scale(1)"; }}
           >
             {loading
               ? <span style={{ display:"flex", alignItems:"center", justifyContent:"center", gap:8 }}>
-                  <span style={{ width:16, height:16, border:"2px solid #00000030", borderTop:"2px solid #000", borderRadius:"50%", animation:"spin 0.7s linear infinite", display:"inline-block" }} />
+                  <span style={{ width:16, height:16, border:`2px solid ${T.ctaColor}30`, borderTop:`2px solid ${T.ctaColor}`, borderRadius:"50%", animation:"spin 0.7s linear infinite", display:"inline-block" }} />
                   처리 중...
                 </span>
               : "계속하기"
@@ -154,13 +229,13 @@ export default function TossPaywall({ onClose }: { onClose?: () => void }) {
           </button>
         </div>
 
-        <p style={S.footnote}>개인정보 방침 &nbsp;|&nbsp; 이용약관 &nbsp;·&nbsp; 언제든지 취소할 수 있습니다.</p>
+        <p style={{ ...S.footnote, color: T.footnoteColor }}>개인정보 방침 &nbsp;|&nbsp; 이용약관 &nbsp;·&nbsp; 언제든지 취소할 수 있습니다.</p>
       </div>
     </div>
   );
 }
 
-/* ══ 슬라이드 비주얼 컴포넌트 ══ */
+/* ══ 슬라이드 비주얼 — 다크 고정 (미니 카드 자체는 항상 다크) ══ */
 function VisaVisual() {
   return (
     <div style={{ ...C.card, background: "linear-gradient(140deg,#0c1528,#162040)" }}>
@@ -241,33 +316,33 @@ const C = {
   card: { width: "100%", maxWidth: 290, borderRadius: 14, padding: "14px 16px", textAlign: "left" as const, boxShadow: "0 16px 40px rgba(0,0,0,0.7)" },
 };
 
+/* ── 구조/레이아웃 전용 — 색상값 없음 ── */
 const S: Record<string, React.CSSProperties> = {
-  overlay: { position: "fixed", inset: 0, background: "rgba(0,0,0,0.65)", display: "flex", alignItems: "flex-end", justifyContent: "center", zIndex: 9999, backdropFilter: "blur(14px)" },
-  sheet: { position: "relative", width: "100%", maxWidth: 430, background: "#0a0a0a", borderRadius: "24px 24px 0 0", padding: "0 20px", fontFamily: `"SF Pro Display", -apple-system, BlinkMacSystemFont, sans-serif`, color: "#fff", animation: "sheetUp 420ms cubic-bezier(0.32,0.72,0,1) forwards", boxShadow: "0 -4px 40px rgba(0,0,0,0.6)" },
-  handle: { width: 36, height: 4, borderRadius: 2, background: "rgba(255,255,255,0.12)", margin: "12px auto 4px" },
-  close: { position: "absolute", top: 16, right: 16, width: 28, height: 28, borderRadius: "50%", background: "rgba(255,255,255,0.07)", border: "1px solid rgba(255,255,255,0.1)", color: "rgba(255,255,255,0.5)", fontSize: 12, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", backdropFilter: "blur(8px)", transition: "all 100ms linear" },
-  slideArea: { textAlign: "center", paddingTop: 14, minHeight: 234 },
-  visual: { display: "flex", justifyContent: "center", marginBottom: 14, animation: "fadeSlide 280ms ease forwards" },
+  overlay:    { position: "fixed", inset: 0, display: "flex", alignItems: "flex-end", justifyContent: "center", zIndex: 9999, backdropFilter: "blur(14px)" },
+  sheet:      { position: "relative", width: "100%", maxWidth: 430, borderRadius: "24px 24px 0 0", padding: "0 20px", fontFamily: `"SF Pro Display", -apple-system, BlinkMacSystemFont, sans-serif`, animation: "sheetUp 420ms cubic-bezier(0.32,0.72,0,1) forwards" },
+  handle:     { width: 36, height: 4, borderRadius: 2, margin: "12px auto 4px" },
+  close:      { position: "absolute", top: 16, right: 16, width: 28, height: 28, borderRadius: "50%", border: "1px solid", fontSize: 12, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", backdropFilter: "blur(8px)", transition: "all 100ms linear" },
+  slideArea:  { textAlign: "center", paddingTop: 14, minHeight: 234 },
+  visual:     { display: "flex", justifyContent: "center", marginBottom: 14, animation: "fadeSlide 280ms ease forwards" },
   slideTitle: { fontSize: 22, fontWeight: 700, margin: "0 0 6px", letterSpacing: -0.6 },
-  slideSub: { fontSize: 14, color: "#5a5a60", lineHeight: 1.65, margin: 0, whiteSpace: "pre-line" },
-  dots: { display: "flex", justifyContent: "center", gap: 5, margin: "12px 0 16px" },
-  dot: { height: 7, borderRadius: 4, border: "none", cursor: "pointer", padding: 0, transition: "all 350ms cubic-bezier(0.34,1.56,0.64,1)" },
-  plans: { display: "flex", gap: 12, marginBottom: 12 },
-  planCard: { flex: 1, position: "relative", padding: "16px 14px 14px", borderRadius: 16, border: "1.5px solid #1c1c1c", background: "#111", cursor: "pointer", display: "flex", flexDirection: "column", gap: 5, alignItems: "flex-start", transition: "border-color 180ms, background 180ms" },
-  planActive: { border: "1.5px solid rgba(255,255,255,0.3)", background: "#161616" },
-  badge: { position: "absolute", top: -11, left: "50%", transform: "translateX(-50%)", background: "#fff", color: "#000", fontSize: 10, fontWeight: 800, padding: "3px 10px", borderRadius: 9999, border: "2px solid #0a0a0a", whiteSpace: "nowrap", letterSpacing: 0.3 },
-  planDot: { width: 8, height: 8, borderRadius: "50%", display: "inline-block", transition: "background 200ms" },
-  planLabel: { fontSize: 13, fontWeight: 600, color: "rgba(255,255,255,0.8)" },
-  planPrice: { fontSize: 20, fontWeight: 800, color: "#fff", letterSpacing: -0.5 },
-  planSub: { fontSize: 11, color: "#444" },
-  errorMsg: { fontSize: 12, color: "#FF453A", margin: "0 0 10px", padding: "7px 10px", background: "rgba(255,69,58,0.08)", borderRadius: 8, border: "1px solid rgba(255,69,58,0.15)" },
-  agreeRow: { display: "flex", alignItems: "flex-start", gap: 10, marginBottom: 14, cursor: "pointer" },
-  checkbox: { width: 20, height: 20, borderRadius: 6, border: "1.5px solid", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center", transition: "all 200ms", marginTop: 1 },
-  agreeText: { fontSize: 12, color: "#444", lineHeight: 1.55 },
-  ctaWrap: { position: "relative", paddingBottom: 6 },
-  cta: { width: "100%", height: 56, borderRadius: 9999, background: "#fff", color: "#000", fontSize: 17, fontWeight: 700, border: "none", cursor: "pointer", position: "relative", zIndex: 2, transition: "transform 100ms linear", letterSpacing: -0.3 },
-  aurora: { position: "absolute", bottom: 2, left: "8%", right: "8%", height: 34, background: "linear-gradient(90deg, #00C7FF 0%, #BF5AF2 33%, #FF375F 66%, #30D158 100%)", borderRadius: "50%", filter: "blur(22px)", zIndex: 1, animation: "auroraGlow 4s ease-in-out infinite", opacity: 0.8 },
-  footnote: { fontSize: 11, color: "#2e2e2e", textAlign: "center", padding: "12px 0 34px", lineHeight: 1.6 },
+  slideSub:   { fontSize: 14, lineHeight: 1.65, margin: 0, whiteSpace: "pre-line" },
+  dots:       { display: "flex", justifyContent: "center", gap: 5, margin: "12px 0 16px" },
+  dot:        { height: 7, borderRadius: 4, border: "none", cursor: "pointer", padding: 0, transition: "all 350ms cubic-bezier(0.34,1.56,0.64,1)" },
+  plans:      { display: "flex", gap: 12, marginBottom: 12 },
+  planCard:   { flex: 1, position: "relative", padding: "16px 14px 14px", borderRadius: 16, cursor: "pointer", display: "flex", flexDirection: "column", gap: 5, alignItems: "flex-start", transition: "border-color 180ms, background 180ms" },
+  badge:      { position: "absolute", top: -11, left: "50%", transform: "translateX(-50%)", fontSize: 10, fontWeight: 800, padding: "3px 10px", borderRadius: 9999, border: "2px solid", whiteSpace: "nowrap", letterSpacing: 0.3 },
+  planDot:    { width: 8, height: 8, borderRadius: "50%", display: "inline-block", transition: "background 200ms" },
+  planLabel:  { fontSize: 13, fontWeight: 600 },
+  planPrice:  { fontSize: 20, fontWeight: 800, letterSpacing: -0.5 },
+  planSub:    { fontSize: 11 },
+  errorMsg:   { fontSize: 12, color: "#FF453A", margin: "0 0 10px", padding: "7px 10px", background: "rgba(255,69,58,0.08)", borderRadius: 8, border: "1px solid rgba(255,69,58,0.15)" },
+  agreeRow:   { display: "flex", alignItems: "flex-start", gap: 10, marginBottom: 14, cursor: "pointer" },
+  checkbox:   { width: 20, height: 20, borderRadius: 6, border: "1.5px solid", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center", transition: "all 200ms", marginTop: 1 },
+  agreeText:  { fontSize: 12, lineHeight: 1.55 },
+  ctaWrap:    { position: "relative", paddingBottom: 6 },
+  cta:        { width: "100%", height: 56, borderRadius: 9999, fontSize: 17, fontWeight: 700, border: "none", cursor: "pointer", position: "relative", zIndex: 2, transition: "transform 100ms linear", letterSpacing: -0.3 },
+  aurora:     { position: "absolute", bottom: 2, left: "8%", right: "8%", height: 34, background: "linear-gradient(90deg, #00C7FF 0%, #BF5AF2 33%, #FF375F 66%, #30D158 100%)", borderRadius: "50%", filter: "blur(22px)", zIndex: 1, animation: "auroraGlow 4s ease-in-out infinite", opacity: 0.8 },
+  footnote:   { fontSize: 11, textAlign: "center", padding: "12px 0 34px", lineHeight: 1.6 },
 };
 
 const KF = `
