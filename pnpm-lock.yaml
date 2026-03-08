@@ -33,14 +33,14 @@ importers:
         specifier: ~55.0.9
         version: 55.0.9(@types/emscripten@1.41.5)(expo@55.0.3)(react-native@0.83.2(@babel/core@7.29.0)(@types/react@19.2.14)(react@19.2.0))(react@19.2.0)
       expo-device:
-        specifier: ^55.0.9
+        specifier: ~55.0.9
         version: 55.0.9(expo@55.0.3)
       expo-image-picker:
         specifier: ~55.0.11
         version: 55.0.11(expo@55.0.3)
       expo-notifications:
-        specifier: ^55.0.10
-        version: 55.0.10(expo@55.0.3)(react-native@0.83.2(@babel/core@7.29.0)(@types/react@19.2.14)(react@19.2.0))(react@19.2.0)(typescript@5.9.3)
+        specifier: ~55.0.11
+        version: 55.0.11(expo@55.0.3)(react-native@0.83.2(@babel/core@7.29.0)(@types/react@19.2.14)(react@19.2.0))(react@19.2.0)(typescript@5.9.3)
       expo-status-bar:
         specifier: ~55.0.4
         version: 55.0.4(react-native@0.83.2(@babel/core@7.29.0)(@types/react@19.2.14)(react@19.2.0))(react@19.2.0)
@@ -75,6 +75,9 @@ importers:
       '@tosspayments/payment-widget-sdk':
         specifier: ^0.12.1
         version: 0.12.1(typescript@5.9.3)
+      '@tosspayments/tosspayments-sdk':
+        specifier: ^2.5.0
+        version: 2.5.0
       next:
         specifier: 16.1.6
         version: 16.1.6(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
@@ -1359,6 +1362,9 @@ packages:
   '@tosspayments/sdk-constants@1.2.2':
     resolution: {integrity: sha512-6WxRHaiycSfz8gY9R/+StdkX5bprHyJ/rf2ak+b8YgBorxUwns8Ev+oyViNBmsPoE77RusaVFNv1kuiJpSNoDA==}
 
+  '@tosspayments/tosspayments-sdk@2.5.0':
+    resolution: {integrity: sha512-qapms+cTY5/4MBwcEegG1GkYBIWVjWv77yWnG2+CWXqdZOtGKLmqt0pb1lbrevBOF/uhO1f2Wtj+r/bggHwiHQ==}
+
   '@types/babel__core@7.20.5':
     resolution: {integrity: sha512-qoQprZvz5wQFJwMDqeseRXWv3rqMvhgpbXFfVyWhbx9X47POIA6i/+dXefEmZKoAgOaTdaIgNSMqMIU61yRyzA==}
 
@@ -1946,8 +1952,8 @@ packages:
       react: '*'
       react-native: '*'
 
-  expo-notifications@55.0.10:
-    resolution: {integrity: sha512-F+ozrVFthKCwfqz2cXmcqrqwzBMTAwoNBqTZERuFtgc+6I++mweVzLLTtbAy8kBDZ33MA13GKyeq7mw13/rDgw==}
+  expo-notifications@55.0.11:
+    resolution: {integrity: sha512-nx9OIx0qJh6HWKW2Jq8uF365q56eDFcAnDMMKOpA3eEFhBy6IzTJNrq9AGdOoylWI4OeVW0Z6wxEXPZOan+9VA==}
     peerDependencies:
       expo: '*'
       react: '*'
@@ -4821,6 +4827,8 @@ snapshots:
 
   '@tosspayments/sdk-constants@1.2.2': {}
 
+  '@tosspayments/tosspayments-sdk@2.5.0': {}
+
   '@types/babel__core@7.20.5':
     dependencies:
       '@babel/parser': 7.29.0
@@ -5443,7 +5451,7 @@ snapshots:
       react: 19.2.0
       react-native: 0.83.2(@babel/core@7.29.0)(@types/react@19.2.14)(react@19.2.0)
 
-  expo-notifications@55.0.10(expo@55.0.3)(react-native@0.83.2(@babel/core@7.29.0)(@types/react@19.2.14)(react@19.2.0))(react@19.2.0)(typescript@5.9.3):
+  expo-notifications@55.0.11(expo@55.0.3)(react-native@0.83.2(@babel/core@7.29.0)(@types/react@19.2.14)(react@19.2.0))(react@19.2.0)(typescript@5.9.3):
     dependencies:
       '@expo/image-utils': 0.8.12
       abort-controller: 3.0.0

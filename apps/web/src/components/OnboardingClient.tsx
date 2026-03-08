@@ -16,44 +16,38 @@ const C = {
 
 /* ─── 다국어 인사 (한국 거주 외국인 Top 30 기준) ─────────────────── */
 const GREETINGS = [
-  // 기존 11개국
-  { text: "안녕하세요", color: "#FF9F0A" },  // 한국
-  { text: "你好",        color: "#30D158" },  // 중국
-  { text: "こんにちは",  color: "#0A84FF" },  // 일본
-  { text: "မင်္ဂလာပါ",  color: "#BF5AF2" },  // 미얀마
-  { text: "Xin chào",   color: "#FF6B6B" },  // 베트남
-  { text: "สวัสดี",     color: "#FFD60A" },  // 태국
-  { text: "Halo",       color: "#64D2FF" },  // 인도네시아
-  { text: "Kumusta",    color: "#FF9F0A" },  // 필리핀
-  { text: "Hello",      color: "#30D158" },  // 미국
-  { text: "Hola",       color: "#FF453A" },  // 스페인
-  { text: "नमस्ते",    color: "#FFD60A" },  // 인도
-  // 추가 19개국 (한국 거주 외국인 多 순)
-  { text: "Привет",     color: "#FF9F0A" },  // 러시아 (CIS계)
-  { text: "Nǐ hǎo",    color: "#30D158" },  // 대만
-  { text: "مرحبا",      color: "#64D2FF" },  // 우즈베키스탄 (아랍계)
-  { text: "Сәлем",     color: "#BF5AF2" },  // 카자흐스탄
-  { text: "Салам",     color: "#FF6B6B" },  // 키르기스스탄
-  { text: "Привіт",    color: "#FFD60A" },  // 우크라이나
-  { text: "Bonjour",   color: "#0A84FF" },  // 프랑스
-  { text: "Hallo",     color: "#FF9F0A" },  // 독일
-  { text: "Ciao",      color: "#30D158" },  // 이탈리아
-  { text: "Olá",       color: "#FF453A" },  // 브라질 (포르투갈어)
-  { text: "Merhaba",   color: "#FFD60A" },  // 터키
-  { text: "سلام",      color: "#64D2FF" },  // 이란
-  { text: "Kamusta",   color: "#BF5AF2" },  // 필리핀(세부아노)
-  { text: "Sawubona",  color: "#FF6B6B" },  // 남아프리카
-  { text: "Héllo",     color: "#0A84FF" },  // 나이지리아
-  { text: "Mingalaba", color: "#FF9F0A" },  // 미얀마(영어식)
-  { text: "Chào",      color: "#30D158" },  // 베트남(간략)
-  { text: "Halló",     color: "#FF453A" },  // 몽골
-  { text: "Sain uu",   color: "#FFD60A" },  // 몽골(공식)
+  { text: "안녕하세요", color: "#FF9F0A" },
+  { text: "你好",        color: "#30D158" },
+  { text: "こんにちは",  color: "#0A84FF" },
+  { text: "မင်္ဂလာပါ",  color: "#BF5AF2" },
+  { text: "Xin chào",   color: "#FF6B6B" },
+  { text: "สวัสดี",     color: "#FFD60A" },
+  { text: "Halo",       color: "#64D2FF" },
+  { text: "Kumusta",    color: "#FF9F0A" },
+  { text: "Hello",      color: "#30D158" },
+  { text: "Hola",       color: "#FF453A" },
+  { text: "नमस्ते",    color: "#FFD60A" },
+  { text: "Привет",     color: "#FF9F0A" },
+  { text: "Nǐ hǎo",    color: "#30D158" },
+  { text: "مرحبا",      color: "#64D2FF" },
+  { text: "Сәлем",     color: "#BF5AF2" },
+  { text: "Салам",     color: "#FF6B6B" },
+  { text: "Привіт",    color: "#FFD60A" },
+  { text: "Bonjour",   color: "#0A84FF" },
+  { text: "Hallo",     color: "#FF9F0A" },
+  { text: "Ciao",      color: "#30D158" },
+  { text: "Olá",       color: "#FF453A" },
+  { text: "Merhaba",   color: "#FFD60A" },
+  { text: "سلام",      color: "#64D2FF" },
+  { text: "Kamusta",   color: "#BF5AF2" },
+  { text: "Sawubona",  color: "#FF6B6B" },
+  { text: "Héllo",     color: "#0A84FF" },
+  { text: "Mingalaba", color: "#FF9F0A" },
+  { text: "Chào",      color: "#30D158" },
+  { text: "Halló",     color: "#FF453A" },
+  { text: "Sain uu",   color: "#FFD60A" },
 ];
 
-/* ─── 에스컬레이터 벨트 ──────────────────────────────────────────
-   position: fixed, 9개 레인을 -30deg 기울여 빼곡히 채움.
-   레인 간격 ~10%씩, 모바일 뷰포트 전체를 덮도록.
-*/
 const LANES = [
   { top:  "0%",  dur: 22, delay:  "0s"   },
   { top:  "8%",  dur: 29, delay: "-6s"   },
@@ -70,7 +64,6 @@ const LANES = [
   { top: "96%",  dur: 21, delay: "-12s"  },
 ];
 
-// 벨트 아이템: 충분히 길게 3배 복제
 const BELT_ITEMS = [...GREETINGS, ...GREETINGS, ...GREETINGS];
 
 function EscalatorBelt() {
@@ -82,11 +75,9 @@ function EscalatorBelt() {
           100% { transform: translateX(-33.333%); }
         }
       `}</style>
-
-      {/* fixed로 뷰포트 전체를 덮은 뒤 -30deg 회전 */}
       <div style={{
         position: "fixed",
-        inset: "-60% -40%",          /* 회전 시 빈 모서리 없도록 충분히 확장 */
+        inset: "-60% -40%",
         zIndex: 0,
         pointerEvents: "none",
         transform: "rotate(-30deg)",
@@ -100,7 +91,7 @@ function EscalatorBelt() {
               position: "absolute",
               top: lane.top,
               left: 0,
-              width: "300%",         /* 3배 길이 — seamless loop */
+              width: "300%",
               display: "flex",
               alignItems: "center",
               gap: "20px",
@@ -132,87 +123,31 @@ function EscalatorBelt() {
   );
 }
 
-/* ─── Apple 곡선 미니멀 하우스 SVG ───────────────────────────────
-   - 지붕: 더 완만한 각도(넓고 낮은 삼각형)
-   - 모든 꺾임에 strokeLinejoin="round" + large strokeLinecap
-   - 지붕 끝 = 벽 상단 모서리 완전 flush
-   - 문: 반원 아치형, 부드러운 라운드
-   - Squircle 감각 = 선이 두껍고 끝처리가 둥글어 포근함
+/* ─── ★ 앱 아이콘 로고 컴포넌트 ────────────────────────────────────
+   세팅: Gemini_Generated_Image_f47g4gf47g4gf47g_1.jpg →
+         apps/web/public/app-icon.jpg 로 저장.
+   borderRadius + overflow:hidden 으로 Squircle 마스킹.
 */
-function HouseIcon({ size = 48, color = "#FFFFFF" }: { size?: number; color?: string }) {
-  const sw = size * 0.072;   // strokeWidth — 두껍고 포근하게
-
-  // 전체 캔버스: size x size
-  // 지붕 꼭짓점: 상단 중앙 (약간 아래)
-  const apex = { x: size * 0.5,  y: size * 0.10 };
-  // 벽 상단 좌우 (지붕 끝과 동일)
-  const wLeft  = size * 0.10;
-  const wRight = size * 0.90;
-  const wTop   = size * 0.46;   // 지붕을 낮고 넓게 — 사다리꼴 느낌
-  const wBot   = size * 0.92;
-  const r      = size * 0.08;   // 벽 하단 모서리 라운딩
-
-  // 지붕 path (꼭짓점 → 우측 → 좌측, flush)
-  const roofPath = `M ${apex.x} ${apex.y} L ${wRight} ${wTop} L ${wLeft} ${wTop} Z`;
-
-  // 벽 path (rounded bottom corners)
-  const wallPath = `
-    M ${wLeft}  ${wTop}
-    L ${wRight} ${wTop}
-    L ${wRight} ${wBot - r}
-    Q ${wRight} ${wBot} ${wRight - r} ${wBot}
-    L ${wLeft  + r} ${wBot}
-    Q ${wLeft}  ${wBot} ${wLeft} ${wBot - r}
-    Z
-  `;
-
-  // 문: 중앙, 반원 아치
-  const dw = size * 0.26;
-  const dh = size * 0.30;
-  const dx = size * 0.5 - dw / 2;
-  const dy = wBot - dh;
-  const doorPath = `
-    M ${dx} ${wBot}
-    L ${dx} ${dy + dw / 2}
-    A ${dw / 2} ${dw / 2} 0 0 1 ${dx + dw} ${dy + dw / 2}
-    L ${dx + dw} ${wBot}
-  `;
+function AppIconLogo({ size = 84 }: { size?: number }) {
+  const radius = Math.round(size * 0.26);
 
   return (
-    <svg
-      width={size} height={size}
-      viewBox={`0 0 ${size} ${size}`}
-      fill="none"
-      style={{ display: "block" }}
-    >
-      {/* 지붕 */}
-      <path
-        d={roofPath}
-        stroke={color}
-        strokeWidth={sw}
-        strokeLinejoin="round"
-        strokeLinecap="round"
-        fill="none"
+    <div style={{
+      width: size,
+      height: size,
+      borderRadius: radius,
+      overflow: "hidden",
+      flexShrink: 0,
+    }}>
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src="/app-icon.jpg"
+        alt="SafeHome Pro"
+        width={size}
+        height={size}
+        style={{ width: size, height: size, objectFit: "cover", display: "block" }}
       />
-      {/* 벽 */}
-      <path
-        d={wallPath}
-        stroke={color}
-        strokeWidth={sw}
-        strokeLinejoin="round"
-        strokeLinecap="round"
-        fill="none"
-      />
-      {/* 문 */}
-      <path
-        d={doorPath}
-        stroke={color}
-        strokeWidth={sw * 0.85}
-        strokeLinejoin="round"
-        strokeLinecap="round"
-        fill="none"
-      />
-    </svg>
+    </div>
   );
 }
 
@@ -382,7 +317,6 @@ function StatsSlide({ onNext }: { onNext: () => void }) {
 
   return (
     <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "flex-end", paddingBottom: 40, position: "relative", zIndex: 1 }}>
-      {/* SafeHome Pro 타이틀 */}
       <div style={{
         display: "flex", alignItems: "center", gap: 6, marginBottom: 24,
         opacity: vis >= 1 ? 1 : 0, transition: "opacity 500ms ease",
@@ -452,16 +386,10 @@ function OrbitSlide({ slide, onNext }: { slide: { headline: string; cta: string 
           border: "1px solid rgba(255,255,255,0.08)",
           background: "radial-gradient(circle, rgba(28,28,28,0.6) 52%, transparent 70%)",
         }} />
-        {/* 중앙 — Apple 곡선 하우스 */}
-        <div style={{
-          width: 86, height: 86, borderRadius: "50%",
-          background: "rgba(255,255,255,0.05)",
-          border: "1.5px solid rgba(255,255,255,0.16)",
-          display: "flex", alignItems: "center", justifyContent: "center",
-          zIndex: 2,
-          boxShadow: "0 0 28px rgba(255,159,10,0.28), 0 0 56px rgba(255,159,10,0.10)",
-        }}>
-          <HouseIcon size={44} color={C.white} />
+
+        {/* ★ 중앙 — 앱 아이콘 스타일 로고 (흰 Squircle + 검정 하우스) */}
+        <div style={{ zIndex: 2, boxShadow: "0 0 28px rgba(255,159,10,0.28), 0 0 56px rgba(255,159,10,0.10)", borderRadius: Math.round(86 * 0.26) }}>
+          <AppIconLogo size={86} />
         </div>
 
         {ORBIT_ICONS.map((icon, i) => {
@@ -507,16 +435,14 @@ function LoginSlide() {
         transform: phase ? "translateY(0)" : "translateY(24px)",
         transition: "opacity 700ms ease, transform 700ms cubic-bezier(0.32,0.72,0,1)",
       }}>
-        {/* 아이콘 컨테이너 */}
+        {/* ★ 앱 아이콘 스타일 로고 (흰 Squircle + 검정 하우스) */}
         <div style={{
-          display: "inline-flex", alignItems: "center", justifyContent: "center",
-          width: 84, height: 84, borderRadius: "50%",
-          background: "rgba(255,255,255,0.06)",
-          border: "1.5px solid rgba(255,255,255,0.16)",
+          display: "inline-flex",
           marginBottom: 22,
           boxShadow: "0 0 40px rgba(191,90,242,0.38), 0 0 72px rgba(0,113,227,0.18)",
+          borderRadius: Math.round(84 * 0.26),
         }}>
-          <HouseIcon size={42} color={C.white} />
+          <AppIconLogo size={84} />
         </div>
 
         {/* SafeHome Pro 로고 */}
@@ -603,17 +529,14 @@ export default function OnboardingClient() {
       display: "flex", flexDirection: "column",
       fontFamily: C.font, overflow: "hidden", position: "relative",
     }}>
-      {/* 배경 글로우 */}
       <div style={{
         position: "fixed", inset: 0, pointerEvents: "none", zIndex: 0,
         background: `radial-gradient(ellipse 70% 45% at 50% 85%, ${(slide as any).glow} 0%, transparent 70%)`,
         transition: "background 800ms ease",
       }} />
 
-      {/* 에스컬레이터 벨트 — step 0 전용, zIndex 0 */}
       {step === 0 && !exiting && <EscalatorBelt />}
 
-      {/* 콘텐츠 래퍼 */}
       <div style={{
         flex: 1, display: "flex", flexDirection: "column",
         maxWidth: 430, width: "100%", margin: "0 auto",
@@ -623,7 +546,6 @@ export default function OnboardingClient() {
         transform: exiting ? "translateY(-8px)" : "translateY(0)",
         transition: "opacity 200ms ease, transform 200ms ease",
       }}>
-        {/* 이전 슬라이드 잔상 */}
         {!exiting && prevSlide && prevSlide.type === "text" && (
           <GhostText lines={prevSlide.lines} sub={prevSlide.sub} />
         )}
@@ -634,7 +556,6 @@ export default function OnboardingClient() {
         {slide.type === "login" && <LoginSlide                               key={step} />}
       </div>
 
-      {/* 진행 인디케이터 */}
       {step < SLIDES.length - 1 && (
         <div style={{ position: "relative", zIndex: 1 }}>
           <Dots total={SLIDES.length - 1} current={step} />
