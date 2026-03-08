@@ -1,5 +1,11 @@
+"use client";
+import { useState } from "react";
 import WelcomeKorea from "@/components/WelcomeKorea";
+import ThemeSelector from "@/components/ThemeSelector";
 
 export default function WelcomePage() {
-  return <WelcomeKorea />;
+  const [step, setStep] = useState<"welcome" | "theme">("welcome");
+
+  if (step === "theme") return <ThemeSelector />;
+  return <WelcomeKorea onNext={() => setStep("theme")} />;
 }
